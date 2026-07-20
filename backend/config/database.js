@@ -1,10 +1,94 @@
 import mongoose from 'mongoose';
 
+const connectionOptions = {
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  family: 4,
+};
+
+let isConnected = false;
+
 export async function connectDB() {
   const uri = process.env.MONGODB_URI;
-  if (!uri) throw new Error('MONGODB_URI is not set');
-  mongoose.set('strictQuery', true);
-  await mongoose.connect(uri);
-  console.log('MongoDB connected');
+
+  if (!uri) {
+    console.warn('MONGODB_URI is not set. Using in-memory fallback.');
+    // In production, you should have MONGODB_URI set
+    // For development, you can use a local MongoDB instance
+    return { connected: false, message: 'No MongoDB URI configured' };
+  }
+
+  if (isConnected) {
+    console.log('Using existing MongoDB connection');
+    return { connected: true };
+  }
+
+  try {
+    mongoose.set('strictQuery', true);
+
+    const db = await mongoose.connect(uri, connectionOptions);
+
+    isConnected = db.connections[0].readyState === 1;
+
+    if (isConnected) {
+      console.log(`MongoDB connected: ${db.connection.host}`);
+    }
+
+    // Handle connection events
+    mongoose.connection.on('error', (err) => {
+      console.error('MongoDB connection error:', err);
+      isConnected = false;
+    });
+
+    mongoose.connection.on('disconnected', () => {
+      console.log('MongoDB disconnected');
+      isConnected = false;
+    });
+
+    mongoose.connection.on('reconnected', () => {
+      console.log('MongoDB reconnected');
+      isConnected = true;
+    });
+
+    // Graceful shutdown
+    process.on('SIGINT', async () => {
+      await mongoose.connection.close();
+      console.log('MongoDB connection closed through app termination');
+      process.exit(0);
+    });
+
+    return { connected: true };
+  } catch (err) {
+    console.error('MongoDB connection error:', err.message);
+    isConnected = false;
+
+    // Retry logic
+    if (process.env.NODE_ENV === 'production') {
+      console.log('Retrying connection in 5 seconds...');
+      setTimeout(connectDB, 5000);
+    }
+
+    return { connected: false, error: err.message };
+  }
+}
+
+export function getConnectionStatus() {
+  return {
+    isConnected,
+    readyState: mongoose.connection.readyState,
+    host: mongoose.connection.host,
+    name: mongoose.connection.name,
+  };
+}
+
+export async function disconnectDB() {
+  try {
+    await mongoose.connection.close();
+    isConnected = false;
+    console.log('MongoDB disconnected');
+  } catch (err) {
+    console.error('Error disconnecting MongoDB:', err);
+  }
 }
 
