@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
+import { useAuth } from '../../../context/AuthContext';
 
 const usersData = Array.from({ length: 12 }, (_, i) => ({
   id: i + 1,
@@ -15,9 +16,31 @@ const usersData = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 export default function AdminUsersPage() {
+  const { user, isAdmin, loading: authLoading } = useAuth();
   const [search, setSearch] = useState('');
   const [filterPlan, setFilterPlan] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+
+  useEffect(() => {
+    if (!authLoading && (!user || !isAdmin)) {
+      window.location.href = '/login';
+    }
+  }, [user, isAdmin, authLoading]);
+
+  if (authLoading || !user || !isAdmin) {
+    return (
+      <div>
+        <Navbar />
+        <main style={{ padding: '100px 20px 60px', maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ padding: 60 }}>
+            <div style={{ width: 48, height: 48, borderRadius: '50%', border: '3px solid rgba(0,229,255,0.2)', borderTopColor: '#00E5FF', margin: '0 auto 20px', animation: 'spin 1s linear infinite' }} />
+            <p style={{ color: '#6B7394' }}>Verifying access...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   const filtered = usersData.filter(u => {
     const matchSearch = u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase());

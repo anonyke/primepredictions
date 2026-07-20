@@ -1,14 +1,33 @@
+'use client';
+
+import { useState } from 'react';
+
 const styles = {
   footer: {
-    background: '#0F1535',
+    background: 'linear-gradient(180deg, #0F1535 0%, #0A0E27 100%)',
     borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-    padding: '60px 0 24px',
+    padding: '80px 0 24px',
     marginTop: 'auto',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  footerGlow: {
+    position: 'absolute',
+    top: -100,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    width: 600,
+    height: 300,
+    borderRadius: '50%',
+    background: 'radial-gradient(circle, rgba(0,229,255,0.04) 0%, transparent 70%)',
+    pointerEvents: 'none',
   },
   container: {
     maxWidth: 1200,
     margin: '0 auto',
     padding: '0 20px',
+    position: 'relative',
+    zIndex: 1,
   },
   grid: {
     display: 'grid',
@@ -30,18 +49,18 @@ const styles = {
     fontSize: 14,
     lineHeight: 1.7,
     maxWidth: 320,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   socialLinks: {
     display: 'flex',
-    gap: 12,
+    gap: 10,
   },
   socialIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.08)',
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    background: 'rgba(255,255,255,0.04)',
+    border: '1px solid rgba(255,255,255,0.06)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -56,12 +75,13 @@ const styles = {
     fontWeight: 600,
     textTransform: 'uppercase',
     letterSpacing: '1px',
-    marginBottom: 16,
+    marginBottom: 20,
+    fontFamily: '"Plus Jakarta Sans", sans-serif',
   },
   linksList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 10,
+    gap: 12,
     listStyle: 'none',
     padding: 0,
     margin: 0,
@@ -71,6 +91,64 @@ const styles = {
     textDecoration: 'none',
     fontSize: 14,
     transition: 'color 0.3s ease',
+  },
+  // Newsletter
+  newsletter: {
+    background: 'rgba(0,229,255,0.04)',
+    border: '1px solid rgba(0,229,255,0.1)',
+    borderRadius: 14,
+    padding: 24,
+    marginBottom: 40,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 24,
+    flexWrap: 'wrap',
+  },
+  newsletterText: {
+    flex: 1,
+    minWidth: 250,
+  },
+  newsletterTitle: {
+    fontFamily: '"Plus Jakarta Sans", sans-serif',
+    fontSize: 16,
+    fontWeight: 700,
+    color: '#fff',
+    marginBottom: 4,
+  },
+  newsletterDesc: {
+    color: '#6B7394',
+    fontSize: 13,
+  },
+  newsletterForm: {
+    display: 'flex',
+    gap: 8,
+    minWidth: 320,
+  },
+  newsletterInput: {
+    flex: 1,
+    padding: '12px 16px',
+    background: '#0F1535',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: 10,
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: 'Inter, sans-serif',
+    outline: 'none',
+    transition: 'border 0.3s ease',
+  },
+  newsletterBtn: {
+    padding: '12px 24px',
+    borderRadius: 10,
+    border: 'none',
+    background: 'linear-gradient(135deg, #00E5FF, #7C4DFF)',
+    color: '#0A0E27',
+    fontSize: 14,
+    fontWeight: 700,
+    cursor: 'pointer',
+    fontFamily: 'Inter, sans-serif',
+    whiteSpace: 'nowrap',
+    transition: 'all 0.3s ease',
   },
   divider: {
     border: 'none',
@@ -98,12 +176,73 @@ const styles = {
     fontSize: 13,
     transition: 'color 0.3s ease',
   },
+  backToTop: {
+    position: 'fixed',
+    bottom: 24,
+    right: 24,
+    width: 44,
+    height: 44,
+    borderRadius: '50%',
+    background: 'linear-gradient(135deg, #00E5FF, #7C4DFF)',
+    color: '#0A0E27',
+    border: 'none',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: 18,
+    fontWeight: 700,
+    boxShadow: '0 0 20px rgba(0,229,255,0.2)',
+    transition: 'all 0.3s ease',
+    zIndex: 50,
+  },
 };
 
 export default function Footer() {
+  const [email, setEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    if (email) {
+      setSubscribed(true);
+      setEmail('');
+      setTimeout(() => setSubscribed(false), 3000);
+    }
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <footer style={styles.footer}>
+      <div style={styles.footerGlow} />
       <div style={styles.container}>
+        {/* Newsletter */}
+        <div style={styles.newsletter}>
+          <div style={styles.newsletterText}>
+            <div style={styles.newsletterTitle}>📬 Stay Ahead of the Game</div>
+            <div style={styles.newsletterDesc}>Get free predictions and exclusive offers delivered to your inbox</div>
+          </div>
+          <form style={styles.newsletterForm} onSubmit={handleSubscribe}>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              style={styles.newsletterInput}
+              onFocus={(e) => e.target.style.borderColor = 'rgba(0,229,255,0.4)'}
+              onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
+              required
+            />
+            <button type="submit" style={styles.newsletterBtn}>
+              {subscribed ? '✅ Subscribed!' : 'Subscribe'}
+            </button>
+          </form>
+        </div>
+
         <div style={styles.grid}>
           <div>
             <div style={styles.brand}>PrimePredict</div>
@@ -172,6 +311,32 @@ export default function Footer() {
           </div>
         </div>
       </div>
+
+      {/* Back to Top Button */}
+      <button
+        style={{
+          ...styles.backToTop,
+          opacity: showBackToTop ? 1 : 0,
+          pointerEvents: showBackToTop ? 'auto' : 'none',
+        }}
+        onClick={scrollToTop}
+        aria-label="Back to top"
+      >
+        ↑
+      </button>
+
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .hamburger-btn {
+            display: block !important;
+          }
+        }
+        @media (min-width: 769px) {
+          .hamburger-btn {
+            display: none !important;
+          }
+        }
+      `}</style>
     </footer>
   );
 }

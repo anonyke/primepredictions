@@ -41,23 +41,27 @@ export default function PredictionCard({
   return (
     <div
       style={{
-        background: '#131849',
-        border: `1px solid ${isPremium ? 'rgba(124, 77, 255, 0.25)' : result === 'won' ? 'rgba(0,230,118,0.15)' : 'rgba(255,255,255,0.06)'}`,
-        borderRadius: 14,
-        padding: 18,
-        transition: 'all 0.3s ease',
+        background: 'rgba(19, 24, 73, 0.8)',
+        backdropFilter: 'blur(12px)',
+        border: `1px solid ${isPremium ? 'rgba(124, 77, 255, 0.3)' : result === 'won' ? 'rgba(0,230,118,0.2)' : 'rgba(255,255,255,0.06)'}`,
+        borderRadius: 16,
+        padding: 20,
+        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         cursor: 'pointer',
         position: 'relative',
+        overflow: 'hidden',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-3px)';
+        e.currentTarget.style.transform = 'translateY(-4px)';
         e.currentTarget.style.boxShadow = isPremium
-          ? '0 0 25px rgba(124,77,255,0.15)'
-          : '0 8px 25px rgba(0,0,0,0.3)';
+          ? '0 0 30px rgba(124,77,255,0.2), 0 8px 32px rgba(0,0,0,0.4)'
+          : '0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(0,229,255,0.05)';
+        e.currentTarget.style.borderColor = isPremium ? 'rgba(124,77,255,0.5)' : 'rgba(0,229,255,0.2)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
         e.currentTarget.style.boxShadow = 'none';
+        e.currentTarget.style.borderColor = isPremium ? 'rgba(124, 77, 255, 0.3)' : result === 'won' ? 'rgba(0,230,118,0.2)' : 'rgba(255,255,255,0.06)';
       }}
       onClick={() => setExpanded(!expanded)}
     >

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
+import { useAuth } from '../../../context/AuthContext';
 
 const payments = [
   { id: 1, user: 'John Kamau', email: 'john@example.com', plan: 'Monthly', amount: 1499, method: 'M-Pesa', ref: 'MPE123456', status: 'completed', date: '2024-01-20' },
@@ -14,6 +15,29 @@ const payments = [
 ];
 
 export default function AdminPaymentsPage() {
+  const { user, isAdmin, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading && (!user || !isAdmin)) {
+      window.location.href = '/login';
+    }
+  }, [user, isAdmin, authLoading]);
+
+  if (authLoading || !user || !isAdmin) {
+    return (
+      <div>
+        <Navbar />
+        <main style={{ padding: '100px 20px 60px', maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ padding: 60 }}>
+            <div style={{ width: 48, height: 48, borderRadius: '50%', border: '3px solid rgba(0,229,255,0.2)', borderTopColor: '#00E5FF', margin: '0 auto 20px', animation: 'spin 1s linear infinite' }} />
+            <p style={{ color: '#6B7394' }}>Verifying access...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
 

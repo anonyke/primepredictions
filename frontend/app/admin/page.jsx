@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import { useAuth } from '../../context/AuthContext';
 
 const adminStats = [
   { label: 'Total Users', value: '3,842', change: '+12%', icon: '👥', color: '#00E5FF' },
@@ -34,8 +35,43 @@ const revenueData = [
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('overview');
+  const { user, isAdmin, loading } = useAuth();
+  const [authorized, setAuthorized] = useState(false);
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user || !isAdmin) {
+        window.location.href = '/login';
+      } else {
+        setAuthorized(true);
+      }
+    }
+  }, [user, isAdmin, loading]);
 
   const maxRevenue = Math.max(...revenueData.map(d => d.amount));
+
+  if (loading || !authorized) {
+    return (
+      <div>
+        <Navbar />
+        <main style={{ padding: '100px 20px 60px', maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ padding: 60 }}>
+            <div style={{
+              width: 48,
+              height: 48,
+              borderRadius: '50%',
+              border: '3px solid rgba(0,229,255,0.2)',
+              borderTopColor: '#00E5FF',
+              animation: 'spin 1s linear infinite',
+              margin: '0 auto 20px',
+            }} />
+            <p style={{ color: '#6B7394' }}>Verifying access...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div>

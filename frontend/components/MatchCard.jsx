@@ -21,27 +21,30 @@ export default function MatchCard({
     return '#FF5252';
   };
 
-  return (
+return (
     <div
       style={{
-        background: 'linear-gradient(135deg, #131849 0%, #1C2260 100%)',
+        background: 'linear-gradient(135deg, rgba(19, 24, 73, 0.9) 0%, rgba(28, 34, 96, 0.9) 100%)',
+        backdropFilter: 'blur(12px)',
         border: `1px solid ${isPremium ? 'rgba(124, 77, 255, 0.3)' : 'rgba(255, 255, 255, 0.06)'}`,
         borderRadius: 16,
         padding: 20,
         cursor: 'pointer',
-        transition: 'all 0.3s ease',
+        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         position: 'relative',
         overflow: 'hidden',
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-4px)';
         e.currentTarget.style.boxShadow = isPremium
-          ? '0 0 30px rgba(124, 77, 255, 0.2)'
-          : '0 8px 32px rgba(0, 0, 0, 0.4)';
+          ? '0 0 30px rgba(124, 77, 255, 0.2), 0 8px 32px rgba(0,0,0,0.4)'
+          : '0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(0,229,255,0.05)';
+        e.currentTarget.style.borderColor = isPremium ? 'rgba(124,77,255,0.5)' : 'rgba(0,229,255,0.15)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
         e.currentTarget.style.boxShadow = 'none';
+        e.currentTarget.style.borderColor = isPremium ? 'rgba(124, 77, 255, 0.3)' : 'rgba(255, 255, 255, 0.06)';
       }}
       onClick={() => setExpanded(!expanded)}
     >
