@@ -9,17 +9,20 @@ const emailStore = [];
 
 const emailTemplates = {
   welcome: (data) => ({
-    subject: 'Welcome to PrimePredict.co.ke!',
+    subject: 'Welcome to PrimePredict.co.ke - Verify Your Email!',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #00E5FF;">Welcome to PrimePredict!</h1>
+        <h1 style="color: #00E5FF;">Welcome to PrimePredict! 🏆</h1>
         <p>Hi ${data.name},</p>
         <p>Thank you for joining PrimePredict.co.ke - Kenya's premier football prediction platform.</p>
-        <p>Get started by exploring our predictions and finding your winning picks.</p>
-        <a href="${process.env.SITE_URL || 'https://primepredict.co.ke'}/predictions"
-           style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #00E5FF, #7C4DFF); color: #fff; text-decoration: none; border-radius: 8px; margin: 20px 0;">
-          View Predictions
+        <p>Please verify your email address to unlock all features:</p>
+        <a href="${data.verifyUrl}"
+           style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #00E5FF, #7C4DFF); color: #0A0E27; text-decoration: none; border-radius: 8px; margin: 20px 0; font-weight: 700;">
+          ✅ Verify Email Address
         </a>
+        <p style="color: #999; font-size: 13px;">This link expires in 24 hours.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+        <p style="color: #999; font-size: 12px;">If you didn't create an account, please ignore this email.</p>
         <p style="color: #666; font-size: 12px;">PrimePredict.co.ke - Premium Football Predictions</p>
       </div>
     `,
@@ -95,8 +98,9 @@ export async function sendEmail({ to, subject, html, text = '' }) {
   }
 }
 
-export async function sendWelcomeEmail(user) {
-  const template = emailTemplates.welcome({ name: user.name });
+export async function sendWelcomeEmail(user, verificationToken) {
+  const verifyUrl = `${process.env.SITE_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
+  const template = emailTemplates.welcome({ name: user.name, verifyUrl });
   return sendEmail({
     to: user.email,
     subject: template.subject,

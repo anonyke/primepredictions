@@ -1,343 +1,64 @@
 'use client';
 
-import { useState } from 'react';
-
-const styles = {
-  footer: {
-    background: 'linear-gradient(180deg, #0F1535 0%, #0A0E27 100%)',
-    borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-    padding: '80px 0 24px',
-    marginTop: 'auto',
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  footerGlow: {
-    position: 'absolute',
-    top: -100,
-    left: '50%',
-    transform: 'translateX(-50%)',
-    width: 600,
-    height: 300,
-    borderRadius: '50%',
-    background: 'radial-gradient(circle, rgba(0,229,255,0.04) 0%, transparent 70%)',
-    pointerEvents: 'none',
-  },
-  container: {
-    maxWidth: 1200,
-    margin: '0 auto',
-    padding: '0 20px',
-    position: 'relative',
-    zIndex: 1,
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: '2fr 1fr 1fr 1fr',
-    gap: 40,
-    marginBottom: 40,
-  },
-  brand: {
-    fontFamily: '"Plus Jakarta Sans", sans-serif',
-    fontSize: 22,
-    fontWeight: 800,
-    background: 'linear-gradient(135deg, #00E5FF, #7C4DFF)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    marginBottom: 12,
-  },
-  desc: {
-    color: '#6B7394',
-    fontSize: 14,
-    lineHeight: 1.7,
-    maxWidth: 320,
-    marginBottom: 20,
-  },
-  socialLinks: {
-    display: 'flex',
-    gap: 10,
-  },
-  socialIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    background: 'rgba(255,255,255,0.04)',
-    border: '1px solid rgba(255,255,255,0.06)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: '#B0B8D1',
-    textDecoration: 'none',
-    fontSize: 16,
-    transition: 'all 0.3s ease',
-  },
-  columnTitle: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 600,
-    textTransform: 'uppercase',
-    letterSpacing: '1px',
-    marginBottom: 20,
-    fontFamily: '"Plus Jakarta Sans", sans-serif',
-  },
-  linksList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 12,
-    listStyle: 'none',
-    padding: 0,
-    margin: 0,
-  },
-  link: {
-    color: '#6B7394',
-    textDecoration: 'none',
-    fontSize: 14,
-    transition: 'color 0.3s ease',
-  },
-  // Newsletter
-  newsletter: {
-    background: 'rgba(0,229,255,0.04)',
-    border: '1px solid rgba(0,229,255,0.1)',
-    borderRadius: 14,
-    padding: 24,
-    marginBottom: 40,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 24,
-    flexWrap: 'wrap',
-  },
-  newsletterText: {
-    flex: 1,
-    minWidth: 250,
-  },
-  newsletterTitle: {
-    fontFamily: '"Plus Jakarta Sans", sans-serif',
-    fontSize: 16,
-    fontWeight: 700,
-    color: '#fff',
-    marginBottom: 4,
-  },
-  newsletterDesc: {
-    color: '#6B7394',
-    fontSize: 13,
-  },
-  newsletterForm: {
-    display: 'flex',
-    gap: 8,
-    minWidth: 320,
-  },
-  newsletterInput: {
-    flex: 1,
-    padding: '12px 16px',
-    background: '#0F1535',
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 10,
-    color: '#fff',
-    fontSize: 14,
-    fontFamily: 'Inter, sans-serif',
-    outline: 'none',
-    transition: 'border 0.3s ease',
-  },
-  newsletterBtn: {
-    padding: '12px 24px',
-    borderRadius: 10,
-    border: 'none',
-    background: 'linear-gradient(135deg, #00E5FF, #7C4DFF)',
-    color: '#0A0E27',
-    fontSize: 14,
-    fontWeight: 700,
-    cursor: 'pointer',
-    fontFamily: 'Inter, sans-serif',
-    whiteSpace: 'nowrap',
-    transition: 'all 0.3s ease',
-  },
-  divider: {
-    border: 'none',
-    borderTop: '1px solid rgba(255,255,255,0.06)',
-    marginBottom: 24,
-  },
-  bottom: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  copyright: {
-    color: '#4A5278',
-    fontSize: 13,
-  },
-  bottomLinks: {
-    display: 'flex',
-    gap: 20,
-  },
-  bottomLink: {
-    color: '#4A5278',
-    textDecoration: 'none',
-    fontSize: 13,
-    transition: 'color 0.3s ease',
-  },
-  backToTop: {
-    position: 'fixed',
-    bottom: 24,
-    right: 24,
-    width: 44,
-    height: 44,
-    borderRadius: '50%',
-    background: 'linear-gradient(135deg, #00E5FF, #7C4DFF)',
-    color: '#0A0E27',
-    border: 'none',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: 18,
-    fontWeight: 700,
-    boxShadow: '0 0 20px rgba(0,229,255,0.2)',
-    transition: 'all 0.3s ease',
-    zIndex: 50,
-  },
-};
-
 export default function Footer() {
-  const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
-  const [showBackToTop, setShowBackToTop] = useState(false);
-
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-    if (email) {
-      setSubscribed(true);
-      setEmail('');
-      setTimeout(() => setSubscribed(false), 3000);
-    }
-  };
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   return (
-    <footer style={styles.footer}>
-      <div style={styles.footerGlow} />
-      <div style={styles.container}>
-        {/* Newsletter */}
-        <div style={styles.newsletter}>
-          <div style={styles.newsletterText}>
-            <div style={styles.newsletterTitle}>📬 Stay Ahead of the Game</div>
-            <div style={styles.newsletterDesc}>Get free predictions and exclusive offers delivered to your inbox</div>
-          </div>
-          <form style={styles.newsletterForm} onSubmit={handleSubscribe}>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              style={styles.newsletterInput}
-              onFocus={(e) => e.target.style.borderColor = 'rgba(0,229,255,0.4)'}
-              onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
-              required
-            />
-            <button type="submit" style={styles.newsletterBtn}>
-              {subscribed ? '✅ Subscribed!' : 'Subscribe'}
-            </button>
-          </form>
-        </div>
-
-        <div style={styles.grid}>
-          <div>
-            <div style={styles.brand}>PrimePredict</div>
-            <p style={styles.desc}>
-              Kenya&apos;s most accurate football prediction platform. Get expert analysis, 
-              premium tips, and data-driven predictions to maximize your winning potential.
+    <footer className="bg-gray-900 text-gray-300 py-8 text-center">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-left mb-8">
+          {/* Brand */}
+          <div className="md:col-span-1">
+            <h3 className="text-white font-bold text-lg mb-3">⚡ PrimePredict</h3>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              Kenya&apos;s most trusted football prediction platform. Expert analysis, premium tips, data-driven insights.
             </p>
-            <div style={styles.socialLinks}>
-              <a href="#" style={styles.socialIcon} aria-label="Twitter / X">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-              </a>
-              <a href="#" style={styles.socialIcon} aria-label="Telegram">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-              </a>
-              <a href="#" style={styles.socialIcon} aria-label="WhatsApp">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-              </a>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="text-white font-semibold text-sm mb-3 uppercase tracking-wider">Quick Links</h4>
+            <div className="flex flex-col gap-2">
+              <a href="/predictions" className="text-gray-400 hover:text-green-400 text-sm no-underline transition">Free Predictions</a>
+              <a href="/premium" className="text-gray-400 hover:text-green-400 text-sm no-underline transition">Premium Tips</a>
+              <a href="/pricing" className="text-gray-400 hover:text-green-400 text-sm no-underline transition">Pricing</a>
+              <a href="/results" className="text-gray-400 hover:text-green-400 text-sm no-underline transition">Results</a>
             </div>
           </div>
 
+          {/* Predictions */}
           <div>
-            <div style={styles.columnTitle}>Quick Links</div>
-            <ul style={styles.linksList}>
-              <li><a href="/predictions" style={styles.link}>Free Predictions</a></li>
-              <li><a href="/premium" style={styles.link}>Premium Tips</a></li>
-              <li><a href="/pricing" style={styles.link}>Pricing Plans</a></li>
-              <li><a href="/results" style={styles.link}>Results</a></li>
-              <li><a href="/dashboard" style={styles.link}>Dashboard</a></li>
-            </ul>
+            <h4 className="text-white font-semibold text-sm mb-3 uppercase tracking-wider">Predictions</h4>
+            <div className="flex flex-col gap-2">
+              <a href="/predictions" className="text-gray-400 hover:text-green-400 text-sm no-underline transition">1X2 Predictions</a>
+              <a href="/predictions" className="text-gray-400 hover:text-green-400 text-sm no-underline transition">Over/Under</a>
+              <a href="/predictions" className="text-gray-400 hover:text-green-400 text-sm no-underline transition">BTTS</a>
+              <a href="/predictions" className="text-gray-400 hover:text-green-400 text-sm no-underline transition">Correct Score</a>
+            </div>
           </div>
 
+          {/* Support */}
           <div>
-            <div style={styles.columnTitle}>Predictions</div>
-            <ul style={styles.linksList}>
-              <li><a href="/predictions?category=1x2" style={styles.link}>1X2 Predictions</a></li>
-              <li><a href="/predictions?category=over-under" style={styles.link}>Over/Under</a></li>
-              <li><a href="/predictions?category=btts" style={styles.link}>BTTS</a></li>
-              <li><a href="/predictions?category=double-chance" style={styles.link}>Double Chance</a></li>
-              <li><a href="/predictions?category=ht-ft" style={styles.link}>HT/FT</a></li>
-              <li><a href="/predictions?category=correct-score" style={styles.link}>Correct Score</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <div style={styles.columnTitle}>Support</div>
-            <ul style={styles.linksList}>
-              <li><a href="#" style={styles.link}>Help Center</a></li>
-              <li><a href="#" style={styles.link}>Privacy Policy</a></li>
-              <li><a href="#" style={styles.link}>Terms of Service</a></li>
-              <li><a href="#" style={styles.link}>Contact Us</a></li>
-              <li><a href="#" style={styles.link}>FAQ</a></li>
-            </ul>
+            <h4 className="text-white font-semibold text-sm mb-3 uppercase tracking-wider">Support</h4>
+            <div className="flex flex-col gap-2">
+              <a href="#" className="text-gray-400 hover:text-green-400 text-sm no-underline transition">Help Center</a>
+              <a href="#" className="text-gray-400 hover:text-green-400 text-sm no-underline transition">Privacy Policy</a>
+              <a href="#" className="text-gray-400 hover:text-green-400 text-sm no-underline transition">Terms of Service</a>
+              <a href="#" className="text-gray-400 hover:text-green-400 text-sm no-underline transition">Contact Us</a>
+            </div>
           </div>
         </div>
 
-        <hr style={styles.divider} />
-
-        <div style={styles.bottom}>
-          <span style={styles.copyright}>
-            &copy; {new Date().getFullYear()} PrimePredict.co.ke. All rights reserved.
-          </span>
-          <div style={styles.bottomLinks}>
-            <a href="#" style={styles.bottomLink}>Privacy Policy</a>
-            <a href="#" style={styles.bottomLink}>Terms of Service</a>
-            <a href="#" style={styles.bottomLink}>Cookie Policy</a>
+        {/* Social & Copyright */}
+        <hr className="border-gray-800 mb-6" />
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-gray-500 text-sm">&copy; {new Date().getFullYear()} PrimePredict. All rights reserved.</p>
+          <div className="flex gap-4">
+            <a href="#" className="text-gray-400 hover:text-green-400 text-sm no-underline transition">Facebook</a>
+            <a href="#" className="text-gray-400 hover:text-green-400 text-sm no-underline transition">Twitter</a>
+            <a href="#" className="text-gray-400 hover:text-green-400 text-sm no-underline transition">Telegram</a>
+            <a href="#" className="text-gray-400 hover:text-green-400 text-sm no-underline transition">WhatsApp</a>
           </div>
         </div>
       </div>
-
-      {/* Back to Top Button */}
-      <button
-        style={{
-          ...styles.backToTop,
-          opacity: showBackToTop ? 1 : 0,
-          pointerEvents: showBackToTop ? 'auto' : 'none',
-        }}
-        onClick={scrollToTop}
-        aria-label="Back to top"
-      >
-        ↑
-      </button>
-
-      <style jsx>{`
-        @media (max-width: 768px) {
-          .hamburger-btn {
-            display: block !important;
-          }
-        }
-        @media (min-width: 769px) {
-          .hamburger-btn {
-            display: none !important;
-          }
-        }
-      `}</style>
     </footer>
   );
 }
-

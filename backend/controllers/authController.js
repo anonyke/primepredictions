@@ -2,6 +2,8 @@ import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
 import { signJWT } from '../utils/jwt.js';
 
+import { sendWelcomeEmail, sendPasswordResetEmail } from '../services/email.js';
+
 export async function register(req, res) {
   try {
     const { name, email, password } = req.body;
@@ -22,11 +24,24 @@ export async function register(req, res) {
     const salt = await bcrypt.genSalt(12);
     const passwordHash = await bcrypt.hash(password, salt);
 
+    // Generate email verification token
+    const crypto = await import('crypto');
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+
     const user = await User.create({
       name,
       email: email.toLowerCase(),
       passwordHash,
+      verificationToken,
     });
+
+    // Send welcome email with verification link
+    try {
+      await sendWelcomeEmail(user, verificationToken);
+      console.log(`[AUTH] Verification email sent to ${email}`);
+    } catch (emailErr) {
+      console.error('[AUTH] Failed to send verification email:', emailErr.message);
+    }
 
     const token = signJWT({ id: user._id, email: user.email, role: user.role });
 
@@ -37,7 +52,9 @@ export async function register(req, res) {
         name: user.name,
         email: user.email,
         role: user.role,
+        emailVerified: user.emailVerified,
       },
+      message: 'Account created! Check your email to verify your account.',
     });
   } catch (err) {
     if (err.code === 11000) {
