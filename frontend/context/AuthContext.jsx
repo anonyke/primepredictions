@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
 const AuthContext = createContext({
   user: null,
   token: null,
@@ -43,7 +45,7 @@ export function AuthProvider({ children }) {
 
     try {
       // Try API call first
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -60,27 +62,7 @@ export function AuthProvider({ children }) {
         setUser(userData);
         return { success: true };
       }
-
-      // Fallback: simulate login for demo
-      if (email && password) {
-        const demoUser = {
-          id: 'demo_' + Date.now(),
-          email,
-          name: email.split('@')[0],
-          role: email.includes('admin') ? 'admin' : 'user',
-          createdAt: new Date().toISOString(),
-        };
-        const demoToken = 'demo_token_' + Date.now();
-
-        window.localStorage.setItem('pp_token', demoToken);
-        window.localStorage.setItem('pp_user', JSON.stringify(demoUser));
-
-        setToken(demoToken);
-        setUser(demoUser);
-        return { success: true };
-      }
-
-      throw new Error('Invalid credentials');
+      throw new Error('Invalid email or password');
     } catch (err) {
       const msg = err.message || 'Login failed. Please try again.';
       setError(msg);
@@ -97,7 +79,7 @@ export function AuthProvider({ children }) {
 
     try {
       // Try API call first
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
@@ -106,12 +88,6 @@ export function AuthProvider({ children }) {
       if (res.ok) {
         return { success: true };
       }
-
-      // Fallback for demo
-      if (name && email && password) {
-        return { success: true };
-      }
-
       throw new Error('Registration failed');
     } catch (err) {
       const msg = err.message || 'Registration failed. Please try again.';

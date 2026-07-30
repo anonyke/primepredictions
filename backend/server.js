@@ -67,6 +67,15 @@ app.get('/health', (req, res) => {
   });
 });
 
+// API landing response
+app.get('/', (req, res) => {
+  res.json({
+    ok: true,
+    service: 'PrimePredict API',
+    health: '/health',
+  });
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
