@@ -33,4 +33,5 @@ yarn-error.log*
 
 # Coverage
 coverage/
-
+backend/scripts/fixEnv.js
+backend/scripts/testDb.js

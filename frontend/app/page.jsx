@@ -1,5 +1,5 @@
-import PredictionCard from "../components/PredictionCard";
 import MatchCard from "../components/MatchCard";
+import PredictionCard from "../components/PredictionCard";
 
 export default function HomePage() {
   return (
@@ -11,7 +11,7 @@ export default function HomePage() {
 
       <section className="mt-6">
         <h2 className="text-xl font-bold">Featured Match</h2>
-        <MatchCard teamA="Arsenal" teamB="Chelsea" prediction="1X" odds="1.65" />
+        <MatchCard teamA="Arsenal" teamB="Chelsea" prediction="1X" odds="1.65" league="Premier League" />
       </section>
 
       <section className="mt-6">

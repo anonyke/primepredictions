@@ -1,12 +1,1142 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PrimePredict.co.ke</title>
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PrimePredict.co.ke - Premium Football Predictions, Betting Tips & Analysis</title>
+  <meta name="description" content="Kenya's most trusted football prediction platform. Get expert 1X2, Over/Under, BTTS predictions with 87% win rate. Premium tips, daily analysis, and more." />
+  <meta name="keywords" content="football predictions, betting tips, 1X2, over under, BTTS, correct score, premium predictions, Kenya" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== CSS VARIABLES ===== */
+    :root {
+      --bg-primary: #0A0E27;
+      --bg-secondary: #0F1535;
+      --bg-tertiary: #1C2260;
+      --bg-card: #131849;
+      --bg-card-hover: #1a1f4e;
+      --text-primary: #FFFFFF;
+      --text-secondary: #B0B8D1;
+      --text-tertiary: #6B7394;
+      --text-muted: #4a5278;
+      --primary: #00E5FF;
+      --primary-light: #66f0ff;
+      --secondary: #7C4DFF;
+      --accent-green: #00E676;
+      --accent-red: #FF5252;
+      --accent-orange: #FF9100;
+      --accent-gold: #FFD700;
+      --border-subtle: rgba(255,255,255,0.06);
+      --border-primary: rgba(0,229,255,0.2);
+      --gradient-primary: linear-gradient(135deg, #00E5FF, #7C4DFF);
+      --gradient-secondary: linear-gradient(135deg, #7C4DFF, #FFD700);
+      --gradient-bg: linear-gradient(135deg, #0A0E27 0%, #131849 50%, #0A0E27 100%);
+      --gradient-card: linear-gradient(135deg, rgba(0,229,255,0.05), rgba(124,77,255,0.05));
+      --shadow-glow: 0 0 20px rgba(0,229,255,0.15);
+      --shadow-glow-secondary: 0 0 20px rgba(124,77,255,0.2);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --radius-full: 50%;
+      --container-width: 1200px;
+      --section-padding: 80px 0;
+      --font-sans: 'Inter', sans-serif;
+      --font-display: 'Plus Jakarta Sans', 'Inter', sans-serif;
+      --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+    ::-webkit-scrollbar-thumb { background: var(--text-tertiary); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+    ::selection { background: var(--primary); color: var(--bg-primary); }
+    a { color: var(--primary); text-decoration: none; transition: var(--transition-base); }
+    a:hover { color: var(--primary-light); }
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--text-primary);
+    }
+    h1 { font-size: 3.5rem; }
+    h2 { font-size: 2.5rem; }
+    h3 { font-size: 1.75rem; }
+    h4 { font-size: 1.25rem; }
+    p { color: var(--text-secondary); line-height: 1.7; }
+    img { max-width: 100%; display: block; }
+    button { font-family: var(--font-sans); cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; }
+
+    /* ===== CONTAINER ===== */
+    .container { width: 100%; max-width: var(--container-width); margin: 0 auto; padding: 0 20px; }
+
+    /* ===== NAVBAR ===== */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      transition: var(--transition-base); padding: 0 20px;
+    }
+    .navbar.scrolled {
+      background: rgba(10, 14, 39, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+    }
+    .navbar-inner {
+      max-width: var(--container-width); margin: 0 auto;
+      height: 70px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; font-size: 1.3rem; font-weight: 800; color: #fff; font-family: var(--font-display); }
+    .logo-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--gradient-primary); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .nav-links { display: flex; align-items: center; gap: 8px; }
+    .nav-links a {
+      padding: 8px 16px; border-radius: var(--radius-md); color: var(--text-secondary);
+      font-size: 0.85rem; font-weight: 500; transition: var(--transition-base);
+    }
+    .nav-links a:hover { color: var(--primary); background: rgba(0,229,255,0.06); }
+    .nav-links a.active { color: var(--primary); background: rgba(0,229,255,0.08); }
+    .nav-buttons { display: flex; align-items: center; gap: 10px; }
+    .hamburger { display: none; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
+    .mobile-menu {
+      display: none; position: fixed; top: 70px; left: 0; right: 0;
+      background: rgba(10,14,39,0.98); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle); padding: 20px;
+      flex-direction: column; gap: 12px; z-index: 999;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { color: var(--text-secondary); font-size: 0.9rem; padding: 10px 0; border-bottom: 1px solid var(--border-subtle); }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px 24px; border: none; border-radius: var(--radius-md);
+      font-size: 0.9rem; font-weight: 600; cursor: pointer;
+      transition: var(--transition-base); text-decoration: none; white-space: nowrap;
+      position: relative; overflow: hidden;
+    }
+    .btn-primary { background: var(--gradient-primary); color: var(--bg-primary); box-shadow: var(--shadow-glow); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(0,229,255,0.3); color: var(--bg-primary); }
+    .btn-secondary { background: transparent; color: var(--primary); border: 1px solid var(--border-primary); }
+    .btn-secondary:hover { background: var(--gradient-card); transform: translateY(-2px); color: var(--primary); }
+    .btn-premium { background: var(--gradient-secondary); color: var(--bg-primary); box-shadow: var(--shadow-glow-secondary); }
+    .btn-premium:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(124,77,255,0.3); color: var(--bg-primary); }
+    .btn-sm { padding: 8px 16px; font-size: 0.8rem; }
+    .btn-lg { padding: 16px 32px; font-size: 1rem; }
+
+    /* ===== HERO SECTION ===== */
+    .hero {
+      min-height: 100vh; display: flex; align-items: center;
+      background: var(--gradient-bg); position: relative; overflow: hidden;
+      padding: 100px 20px 60px;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle at 30% 50%, rgba(0,229,255,0.04) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 50%, rgba(124,77,255,0.04) 0%, transparent 50%);
+      animation: rotateSlow 30s linear infinite; pointer-events: none;
+    }
+    .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; position: relative; z-index: 1; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
+      border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 20px;
+      background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2); color: var(--primary);
+    }
+    .hero h1 { margin-bottom: 20px; }
+    .hero h1 span { background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero p { font-size: 1.1rem; margin-bottom: 32px; max-width: 540px; }
+    .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+    .hero-stats { display: flex; gap: 40px; margin-top: 48px; flex-wrap: wrap; }
+    .hero-stat { text-align: center; }
+    .hero-stat-value { font-size: 2rem; font-weight: 800; font-family: var(--font-display); background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-stat-label { font-size: 0.8rem; color: var(--text-tertiary); margin-top: 4px; }
+    .hero-visual { position: relative; display: flex; align-items: center; justify-content: center; }
+    .hero-card {
+      width: 100%; max-width: 440px; padding: 32px; border-radius: var(--radius-xl);
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .hero-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .hero-card-header h3 { font-size: 1rem; }
+    .hero-card-match { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--border-subtle); margin-bottom: 20px; }
+    .hero-card-team { text-align: center; flex: 1; }
+    .hero-card-team .icon { width: 48px; height: 48px; margin: 0 auto 8px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .hero-card-team .name { font-size: 0.9rem; font-weight: 700; color: #fff; }
+    .hero-card-vs { width: 36px; height: 36px; border-radius: 50%; background: var(--gradient-primary); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800; color: var(--bg-primary); flex-shrink: 0; }
+    .hero-card-details { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    .hero-card-detail { text-align: center; padding: 8px; border-radius: 8px; background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.1); }
+    .hero-card-detail .label { font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 2px; }
+    .hero-card-detail .value { font-size: 1rem; font-weight: 800; }
+    .hero-card-detail .value.cyan { color: var(--primary); }
+    .hero-card-detail .value.gold { color: var(--accent-gold); }
+    .confidence-bar { width: 100%; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.06); overflow: hidden; }
+    .confidence-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent-green), var(--primary)); width: 85%; transition: width 1s ease; }
+
+    /* ===== LIVE TICKER ===== */
+    .ticker-wrap {
+      background: var(--bg-secondary); border-top: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle); overflow: hidden; padding: 8px 0;
+    }
+    .ticker { display: flex; gap: 40px; animation: ticker 20s linear infinite; white-space: nowrap; }
+    .ticker-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-secondary); }
+    .ticker-item .vs { color: var(--text-tertiary); margin: 0 4px; }
+    .ticker-item .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-red); display: inline-block; animation: pulse 1.5s ease infinite; }
+
+    /* ===== SECTION STYLES ===== */
+    .section { padding: var(--section-padding); position: relative; }
+    .section-header { text-align: center; margin-bottom: 48px; }
+    .section-header h2 { margin-bottom: 16px; }
+    .section-header h2 span { background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .section-header p { font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+    .section-bg-alt { background: var(--bg-secondary); }
+
+    /* ===== LEAGUE TABS ===== */
+    .league-tabs {
+      display: flex; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; justify-content: center;
+    }
+    .league-tab {
+      padding: 10px 18px; border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle); background: transparent;
+      color: var(--text-secondary); font-size: 0.8rem; font-weight: 600;
+      cursor: pointer; transition: var(--transition-base);
+    }
+    .league-tab:hover { border-color: var(--border-primary); color: var(--primary); }
+    .league-tab.active { border-color: rgba(0,229,255,0.3); background: rgba(0,229,255,0.08); color: var(--primary); }
+
+    /* ===== PREDICTION CARD ===== */
+    .predictions-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px;
+    }
+    .pred-card {
+      background: var(--gradient-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); padding: 20px; cursor: pointer;
+      transition: var(--transition-base); position: relative; overflow: hidden;
+    }
+    .pred-card:hover { transform: translateY(-4px); border-color: var(--border-primary); box-shadow: 0 8px 32px rgba(0,0,0,0.4), var(--shadow-glow); }
+    .pred-card.premium { border-color: rgba(124,77,255,0.3); }
+    .pred-card.premium:hover { border-color: rgba(124,77,255,0.5); box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 30px rgba(124,77,255,0.2); }
+    .pred-badge {
+      position: absolute; top: 12px; right: 12px;
+      padding: 3px 10px; border-radius: var(--radius-sm); font-size: 0.7rem;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .pred-badge.premium { background: var(--gradient-secondary); color: var(--bg-primary); }
+    .pred-badge.free { background: rgba(0,229,255,0.15); color: var(--primary); }
+    .pred-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .pred-league { padding: 3px 10px; border-radius: var(--radius-sm); font-size: 0.7rem; font-weight: 600; background: rgba(255,255,255,0.06); color: var(--text-tertiary); }
+    .pred-time { font-size: 0.75rem; color: var(--text-tertiary); font-weight: 500; }
+    .pred-teams { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 12px; }
+    .pred-team { text-align: center; flex: 1; }
+    .pred-team .icon { width: 40px; height: 40px; margin: 0 auto 6px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .pred-team .name { font-size: 0.85rem; font-weight: 700; color: #fff; }
+    .pred-vs { width: 32px; height: 32px; border-radius: 50%; background: var(--gradient-primary); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 800; color: var(--bg-primary); flex-shrink: 0; }
+    .pred-info { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .pred-info-item { text-align: center; padding: 8px 4px; border-radius: 8px; }
+    .pred-info-item.pick { background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.1); }
+    .pred-info-item.odds { background: rgba(255,215,0,0.06); border: 1px solid rgba(255,215,0,0.1); }
+    .pred-info-item .label { font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 2px; }
+    .pred-info-item .value { font-size: 1rem; font-weight: 800; }
+    .pred-info-item .value.cyan { color: var(--primary); }
+    .pred-info-item .value.gold { color: var(--accent-gold); }
+    .pred-type-badge { text-align: center; margin-bottom: 10px; padding: 3px 8px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.03); font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; display: inline-block; margin-left: auto; margin-right: auto; width: 100%; }
+    .pred-confidence { margin-top: 8px; }
+    .pred-confidence-header { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.75rem; color: var(--text-secondary); }
+    .pred-confidence-header span:last-child { font-weight: 700; }
+
+    /* ===== STATS ROW ===== */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;
+    }
+    .stat-card {
+      padding: 24px; border-radius: var(--radius-lg); text-align: center;
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      transition: var(--transition-base);
+    }
+    .stat-card:hover { transform: translateY(-4px); border-color: var(--border-primary); box-shadow: var(--shadow-glow); }
+    .stat-card .icon { font-size: 2rem; margin-bottom: 12px; }
+    .stat-card .value { font-size: 2rem; font-weight: 800; font-family: var(--font-display); margin-bottom: 4px; }
+    .stat-card .label { font-size: 0.85rem; color: var(--text-tertiary); }
+
+    /* ===== RESULT TABLE ===== */
+    .table-container { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); overflow: hidden; }
+    .table-container th { background: var(--bg-tertiary); padding: 14px 20px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-tertiary); font-weight: 600; border-bottom: 1px solid var(--border-subtle); }
+    .table-container td { padding: 14px 20px; border-bottom: 1px solid var(--border-subtle); font-size: 0.85rem; color: var(--text-secondary); }
+    .table-container tr:hover td { background: var(--bg-card-hover); }
+    .table-container tr:last-child td { border-bottom: none; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-win { background: rgba(0,230,118,0.15); color: var(--accent-green); }
+    .badge-loss { background: rgba(255,82,82,0.15); color: var(--accent-red); }
+    .badge-pending { background: rgba(255,145,0,0.15); color: var(--accent-orange); }
+
+    /* ===== PRICING ===== */
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+    .pricing-card {
+      position: relative; padding: 32px 24px; border-radius: var(--radius-xl);
+      border: 1px solid var(--border-subtle); transition: var(--transition-base);
+      overflow: hidden;
+    }
+    .pricing-card:hover { transform: translateY(-8px); }
+    .pricing-card.popular { border-color: rgba(124,77,255,0.3); background: linear-gradient(135deg, rgba(124,77,255,0.08), rgba(255,215,0,0.04)); }
+    .pricing-card.popular:hover { box-shadow: 0 0 40px rgba(124,77,255,0.2); }
+    .pricing-badge { position: absolute; top: 16px; right: 16px; padding: 4px 12px; border-radius: var(--radius-sm); background: var(--gradient-secondary); color: var(--bg-primary); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .pricing-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 16px; background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.15); }
+    .pricing-name { font-size: 1.3rem; font-weight: 800; margin-bottom: 4px; }
+    .pricing-desc { color: var(--text-tertiary); font-size: 0.85rem; margin-bottom: 20px; min-height: 40px; }
+    .pricing-price { margin-bottom: 24px; }
+    .pricing-price .amount { font-size: 2.5rem; font-weight: 800; color: #fff; font-family: var(--font-display); }
+    .pricing-price .period { color: var(--text-tertiary); font-size: 1rem; margin-left: 4px; }
+    .pricing-features { list-style: none; padding: 0; margin: 0 0 24px; display: flex; flex-direction: column; gap: 10px; }
+    .pricing-features li { display: flex; align-items: center; gap: 10px; color: var(--text-secondary); font-size: 0.85rem; }
+    .pricing-features li .check { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; font-size: 0.6rem; }
+
+    /* ===== TRUST SECTION ===== */
+    .trust-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; text-align: center; }
+    .trust-item { padding: 20px; }
+    .trust-item .icon { font-size: 1.5rem; margin-bottom: 8px; color: var(--text-tertiary); }
+    .trust-item .title { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; }
+    .trust-item .desc { font-size: 0.8rem; color: var(--text-tertiary); }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      background: var(--bg-secondary); padding: 60px 20px 30px;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 40px; margin-bottom: 40px; }
+    .footer-brand p { font-size: 0.85rem; margin-top: 12px; max-width: 320px; }
+    .footer h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-tertiary); margin-bottom: 16px; }
+    .footer ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+    .footer ul a { color: var(--text-secondary); font-size: 0.85rem; }
+    .footer ul a:hover { color: var(--primary); }
+    .footer hr { border: none; border-top: 1px solid var(--border-subtle); margin-bottom: 20px; }
+    .footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; }
+    .footer-bottom p { font-size: 0.8rem; color: var(--text-muted); }
+    .footer-socials { display: flex; gap: 16px; }
+    .footer-socials a { color: var(--text-tertiary); font-size: 0.85rem; transition: var(--transition-base); }
+    .footer-socials a:hover { color: var(--primary); }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideInLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    @keyframes rotateSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    @keyframes glow { 0%, 100% { box-shadow: 0 0 20px rgba(0,229,255,0.1); } 50% { box-shadow: 0 0 50px rgba(0,229,255,0.3); } }
+
+    .animate-fadeIn { animation: fadeIn 0.6s ease forwards; }
+    .animate-fadeInUp { animation: fadeInUp 0.7s ease forwards; }
+    .animate-scaleIn { animation: scaleIn 0.4s ease forwards; }
+    .animate-float { animation: float 4s ease-in-out infinite; }
+    .animate-glow { animation: glow 3s ease-in-out infinite; }
+    .delay-100 { animation-delay: 100ms; }
+    .delay-200 { animation-delay: 200ms; }
+    .delay-300 { animation-delay: 300ms; }
+    .delay-400 { animation-delay: 400ms; }
+    .delay-500 { animation-delay: 500ms; }
+
+    /* ===== SCROLL REVEAL ===== */
+    .scroll-reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
+    .scroll-reveal.revealed { opacity: 1; transform: translateY(0); }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+      display: none; align-items: center; justify-content: center; z-index: 2000;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl); padding: 32px; max-width: 500px;
+      width: 90%; max-height: 80vh; overflow-y: auto; animation: scaleIn 0.3s ease;
+    }
+    .modal-close { float: right; background: none; border: none; color: var(--text-tertiary); font-size: 1.5rem; cursor: pointer; }
+    .modal h2 { margin-bottom: 16px; font-size: 1.3rem; }
+    .modal p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 12px; line-height: 1.7; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      h1 { font-size: 2.8rem; }
+      h2 { font-size: 2rem; }
+      .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+      .hero-visual { order: -1; }
+      .hero-card { max-width: 100%; }
+      .hero-stats { justify-content: center; }
+    }
+    @media (max-width: 768px) {
+      h1 { font-size: 2.2rem; }
+      h2 { font-size: 1.6rem; }
+      .nav-links, .nav-buttons { display: none; }
+      .hamburger { display: block; }
+      .section { padding: 40px 0; }
+      .predictions-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .table-container { overflow-x: auto; }
+      .hero-stat-value { font-size: 1.5rem; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) {
+      h1 { font-size: 1.8rem; }
+      .btn-lg { padding: 14px 24px; font-size: 0.9rem; }
+      .stats-row { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ===== SKELETON LOADING ===== */
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-card-hover) 50%, var(--bg-tertiary) 75%);
+      background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--radius-sm);
+    }
+    .skeleton-text { height: 16px; margin-bottom: 8px; }
+    .skeleton-title { height: 24px; width: 60%; margin-bottom: 12px; }
+
+    /* ===== UTILITY ===== */
+    .text-gradient { background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .text-center { text-align: center; }
+    .mt-lg { margin-top: 48px; }
+    .mb-lg { margin-bottom: 48px; }
+    .gap-lg { gap: 24px; }
+    .flex { display: flex; }
+    .flex-wrap { flex-wrap: wrap; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .justify-center { justify-content: center; }
+
+    /* Countdown timer */
+    .countdown { display: flex; gap: 8px; justify-content: center; }
+    .countdown-item { text-align: center; padding: 8px 12px; border-radius: 8px; background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.1); min-width: 50px; }
+    .countdown-item .num { font-size: 1.1rem; font-weight: 800; color: var(--primary); display: block; }
+    .countdown-item .lbl { font-size: 0.6rem; color: var(--text-tertiary); text-transform: uppercase; }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <header class="navbar" id="navbar">
+    <div class="navbar-inner">
+      <a href="#" class="logo">
+        <span class="logo-icon">⚡</span>
+        PrimePredict
+      </a>
+      <nav class="nav-links" id="navLinks">
+        <a href="#home" class="active">Home</a>
+        <a href="#predictions">Predictions</a>
+        <a href="#results">Results</a>
+        <a href="#pricing">Pricing</a>
+      </nav>
+      <div class="nav-buttons">
+        <a href="#pricing" class="btn btn-sm btn-primary">Get Premium</a>
+        <a href="#login" class="btn btn-sm btn-secondary">Login</a>
+      </div>
+      <button class="hamburger" onclick="toggleMobileMenu()">☰</button>
+    </div>
+  </header>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#home" onclick="closeMobileMenu()">Home</a>
+    <a href="#predictions" onclick="closeMobileMenu()">Predictions</a>
+    <a href="#results" onclick="closeMobileMenu()">Results</a>
+    <a href="#pricing" onclick="closeMobileMenu()">Pricing</a>
+    <a href="#login" onclick="closeMobileMenu()">Login</a>
+    <a href="#pricing" onclick="closeMobileMenu()" style="color: var(--primary); font-weight: 700;">Get Premium</a>
+  </div>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="hero" id="home">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="animate-fadeInUp">
+          <div class="hero-badge">
+            <span style="color: var(--accent-green);">✓</span>
+            Trusted by 10,000+ Bettors
+          </div>
+          <h1>
+            Premium Football<br />
+            <span>Predictions</span> &amp; Tips
+          </h1>
+          <p>
+            Get expert analysis, data-driven predictions, and premium betting tips
+            across 1X2, Over/Under, BTTS, Correct Score, and more. 87% win rate guaranteed.
+          </p>
+          <div class="hero-actions">
+            <a href="#predictions" class="btn btn-primary btn-lg">View Predictions</a>
+            <a href="#pricing" class="btn btn-premium btn-lg">Get Premium</a>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <div class="hero-stat-value">87%</div>
+              <div class="hero-stat-label">Win Rate</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-value">50+</div>
+              <div class="hero-stat-label">Daily Picks</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-value">10K+</div>
+              <div class="hero-stat-label">Active Users</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-value">6</div>
+              <div class="hero-stat-label">Categories</div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-visual animate-float" style="animation-delay: 0.5s;">
+          <div class="hero-card animate-glow">
+            <div class="hero-card-header">
+              <h3>⚡ Featured Pick</h3>
+              <span style="padding: 3px 10px; border-radius: 4px; background: var(--gradient-secondary); color: var(--bg-primary); font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">Premium</span>
+            </div>
+            <div class="hero-card-match">
+              <div class="hero-card-team">
+                <div class="icon">🔴</div>
+                <div class="name">Manchester City</div>
+              </div>
+              <div class="hero-card-vs">VS</div>
+              <div class="hero-card-team">
+                <div class="icon">🔵</div>
+                <div class="name">Arsenal</div>
+              </div>
+            </div>
+            <div class="hero-card-details">
+              <div class="hero-card-detail">
+                <div class="label">Prediction</div>
+                <div class="value cyan">1</div>
+              </div>
+              <div class="hero-card-detail" style="background: rgba(255,215,0,0.06); border-color: rgba(255,215,0,0.1);">
+                <div class="label">Odds</div>
+                <div class="value gold">1.85</div>
+              </div>
+            </div>
+            <div style="text-align: center; margin-bottom: 10px;">
+              <span style="font-size: 0.75rem; color: var(--text-secondary);">Premier League • Today, 17:00</span>
+            </div>
+            <div class="pred-confidence">
+              <div class="pred-confidence-header">
+                <span>Confidence</span>
+                <span style="color: var(--accent-green);">85%</span>
+              </div>
+              <div class="confidence-bar">
+                <div class="confidence-fill" style="width: 85%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== LIVE TICKER ===== -->
+  <div class="ticker-wrap">
+    <div class="ticker" id="ticker1">
+      <span class="ticker-item"><span class="live-dot"></span> Man City vs Arsenal <span class="vs">•</span> Prediction: 1 <span class="vs">•</span> Odds: 1.85</span>
+      <span class="ticker-item"><span class="live-dot"></span> Liverpool vs Tottenham <span class="vs">•</span> Over 2.5 <span class="vs">•</span> Odds: 1.72</span>
+      <span class="ticker-item"><span class="live-dot"></span> Barcelona vs Real Madrid <span class="vs">•</span> BTTS Yes <span class="vs">•</span> Odds: 1.70</span>
+      <span class="ticker-item"><span class="live-dot"></span> Bayern vs Leipzig <span class="vs">•</span> 1 <span class="vs">•</span> Odds: 1.65</span>
+      <span class="ticker-item"><span class="live-dot"></span> PSG vs Marseille <span class="vs">•</span> BTTS Yes <span class="vs">•</span> Odds: 1.80</span>
+      <span class="ticker-item"><span class="live-dot"></span> Chelsea vs Man Utd <span class="vs">•</span> 1X <span class="vs">•</span> Odds: 1.25</span>
+      <span class="ticker-item"><span class="live-dot"></span> Inter vs Juventus <span class="vs">•</span> Under 2.5 <span class="vs">•</span> Odds: 2.10</span>
+      <!-- Duplicate for seamless loop -->
+      <span class="ticker-item"><span class="live-dot"></span> Man City vs Arsenal <span class="vs">•</span> Prediction: 1 <span class="vs">•</span> Odds: 1.85</span>
+      <span class="ticker-item"><span class="live-dot"></span> Liverpool vs Tottenham <span class="vs">•</span> Over 2.5 <span class="vs">•</span> Odds: 1.72</span>
+      <span class="ticker-item"><span class="live-dot"></span> Barcelona vs Real Madrid <span class="vs">•</span> BTTS Yes <span class="vs">•</span> Odds: 1.70</span>
+      <span class="ticker-item"><span class="live-dot"></span> Bayern vs Leipzig <span class="vs">•</span> 1 <span class="vs">•</span> Odds: 1.65</span>
+      <span class="ticker-item"><span class="live-dot"></span> PSG vs Marseille <span class="vs">•</span> BTTS Yes <span class="vs">•</span> Odds: 1.80</span>
+      <span class="ticker-item"><span class="live-dot"></span> Chelsea vs Man Utd <span class="vs">•</span> 1X <span class="vs">•</span> Odds: 1.25</span>
+      <span class="ticker-item"><span class="live-dot"></span> Inter vs Juventus <span class="vs">•</span> Under 2.5 <span class="vs">•</span> Odds: 2.10</span>
+    </div>
+  </div>
+
+  <!-- ===== STATS ROW ===== -->
+  <section class="section">
+    <div class="container">
+      <div class="stats-row">
+        <div class="stat-card"><div class="icon">📊</div><div class="value" style="color: var(--primary);">1,247</div><div class="label">Total Predictions</div></div>
+        <div class="stat-card"><div class="icon">✅</div><div class="value" style="color: var(--accent-green);">1,085</div><div class="label">Won</div></div>
+        <div class="stat-card"><div class="icon">❌</div><div class="value" style="color: var(--accent-red);">162</div><div class="label">Lost</div></div>
+        <div class="stat-card"><div class="icon">⭐</div><div class="value" style="color: var(--accent-gold);">87%</div><div class="label">Win Rate</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PREDICTIONS SECTION ===== -->
+  <section class="section section-bg-alt" id="predictions">
+    <div class="container">
+      <div class="section-header scroll-reveal">
+        <h2>Today's <span>Predictions</span></h2>
+        <p>Expert analysis and predictions across all major leagues. Filter by category to find your edge.</p>
+      </div>
+
+      <!-- League Tabs Filter -->
+      <div class="league-tabs" id="leagueTabs">
+        <button class="league-tab active" data-category="all" onclick="filterPredictions('all')">🏆 All</button>
+        <button class="league-tab" data-category="1x2" onclick="filterPredictions('1x2')">🎯 1X2</button>
+        <button class="league-tab" data-category="ou" onclick="filterPredictions('ou')">📊 Over/Under</button>
+        <button class="league-tab" data-category="btts" onclick="filterPredictions('btts')">⚽ BTTS</button>
+        <button class="league-tab" data-category="dc" onclick="filterPredictions('dc')">🛡️ Double Chance</button>
+        <button class="league-tab" data-category="htft" onclick="filterPredictions('htft')">🔄 HT/FT</button>
+        <button class="league-tab" data-category="cs" onclick="filterPredictions('cs')">✅ Correct Score</button>
+      </div>
+
+      <!-- Filter Toggle -->
+      <div class="flex items-center justify-between" style="margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+        <span style="color: var(--text-tertiary); font-size: 0.85rem;">Showing <strong style="color: #fff;" id="predCount">13</strong> predictions</span>
+        <button class="btn btn-sm btn-secondary" id="premiumToggle" onclick="togglePremiumFilter()">⭐ Premium Only</button>
+      </div>
+
+      <!-- Predictions Grid -->
+      <div class="predictions-grid" id="predictionsGrid">
+        <!-- Dynamically rendered via JS -->
+      </div>
+
+      <!-- Premium CTA -->
+      <div class="scroll-reveal" style="margin-top: 48px; padding: 32px; border-radius: var(--radius-lg); background: linear-gradient(135deg, rgba(124,77,255,0.08), rgba(255,215,0,0.05)); border: 1px solid rgba(124,77,255,0.15); text-align: center;">
+        <h3 style="font-size: 1.3rem; margin-bottom: 8px;">⭐ Get Premium Access</h3>
+        <p style="max-width: 480px; margin: 0 auto 20px;">
+          Unlock premium predictions with higher confidence, correct score tips, and exclusive analysis.
+        </p>
+        <a href="#pricing" class="btn btn-premium btn-lg">
+          View Premium Plans
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== RESULTS SECTION ===== -->
+  <section class="section" id="results">
+    <div class="container">
+      <div class="section-header scroll-reveal">
+        <h2>Prediction <span>Results</span></h2>
+        <p>Track our performance with transparent win/loss records across all categories.</p>
+      </div>
+
+      <!-- Results Stats -->
+      <div class="stats-row" style="margin-bottom: 32px;">
+        <div class="stat-card"><div class="icon">📋</div><div class="value" style="color: #fff;">10</div><div class="label">Total</div></div>
+        <div class="stat-card"><div class="icon">✅</div><div class="value" style="color: var(--accent-green);">6</div><div class="label">Won</div></div>
+        <div class="stat-card"><div class="icon">❌</div><div class="value" style="color: var(--accent-red);">3</div><div class="label">Lost</div></div>
+        <div class="stat-card"><div class="icon">⏳</div><div class="value" style="color: var(--accent-orange);">1</div><div class="label">Pending</div></div>
+        <div class="stat-card"><div class="icon">📈</div><div class="value" style="color: var(--accent-gold);">67%</div><div class="label">Win Rate</div></div>
+      </div>
+
+      <!-- Results Filters -->
+      <div class="league-tabs" id="resultFilters" style="justify-content: flex-start;">
+        <button class="league-tab active" onclick="filterResults('all')">All</button>
+        <button class="league-tab" onclick="filterResults('won')">Won</button>
+        <button class="league-tab" onclick="filterResults('lost')">Lost</button>
+        <button class="league-tab" onclick="filterResults('pending')">Pending</button>
+      </div>
+
+      <!-- Results Table -->
+      <div class="table-container" style="margin-top: 20px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Match</th>
+              <th>Type</th>
+              <th>Prediction</th>
+              <th>Odds</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody id="resultsTableBody">
+            <!-- Dynamically rendered -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PRICING SECTION ===== -->
+  <section class="section section-bg-alt" id="pricing">
+    <div class="container">
+      <div class="section-header scroll-reveal">
+        <div style="font-size: 2.5rem; margin-bottom: 12px;">💎</div>
+        <h2>Premium <span>Subscription Plans</span></h2>
+        <p>Choose the plan that fits your betting style. All plans include access to our premium prediction engine.</p>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- Weekly -->
+        <div class="pricing-card scroll-reveal" style="background: linear-gradient(135deg, rgba(0,229,255,0.06), rgba(0,229,255,0.02));">
+          <div class="pricing-icon" style="background: rgba(0,229,255,0.08); border-color: rgba(0,229,255,0.15);">⚡</div>
+          <h3 class="pricing-name">Weekly</h3>
+          <p class="pricing-desc">Perfect for trying out premium predictions</p>
+          <div class="pricing-price">
+            <span class="amount">KES 499</span>
+            <span class="period">/week</span>
+          </div>
+          <ul class="pricing-features">
+            <li><span class="check" style="background: rgba(0,229,255,0.15); color: var(--primary);">✓</span> Access to all premium picks</li>
+            <li><span class="check" style="background: rgba(0,229,255,0.15); color: var(--primary);">✓</span> 6 prediction categories</li>
+            <li><span class="check" style="background: rgba(0,229,255,0.15); color: var(--primary);">✓</span> Daily predictions</li>
+            <li><span class="check" style="background: rgba(0,229,255,0.15); color: var(--primary);">✓</span> Email support</li>
+            <li><span class="check" style="background: rgba(0,229,255,0.15); color: var(--primary);">✓</span> Basic analytics</li>
+          </ul>
+          <button class="btn btn-primary" style="width: 100%;" onclick="showPaymentModal('Weekly', '499')">Choose Weekly</button>
+        </div>
+
+        <!-- Monthly (Popular) -->
+        <div class="pricing-card popular scroll-reveal" style="animation-delay: 0.1s;">
+          <div class="pricing-badge">Most Popular</div>
+          <div class="pricing-icon" style="background: rgba(124,77,255,0.08); border-color: rgba(124,77,255,0.15);">⭐</div>
+          <h3 class="pricing-name">Monthly</h3>
+          <p class="pricing-desc">Most popular plan for serious bettors</p>
+          <div class="pricing-price">
+            <span class="amount">KES 1,499</span>
+            <span class="period">/month</span>
+          </div>
+          <ul class="pricing-features">
+            <li><span class="check" style="background: rgba(124,77,255,0.15); color: var(--secondary);">✓</span> Everything in Weekly</li>
+            <li><span class="check" style="background: rgba(124,77,255,0.15); color: var(--secondary);">✓</span> 87% average win rate</li>
+            <li><span class="check" style="background: rgba(124,77,255,0.15); color: var(--secondary);">✓</span> Correct score predictions</li>
+            <li><span class="check" style="background: rgba(124,77,255,0.15); color: var(--secondary);">✓</span> Expert analysis &amp; insights</li>
+            <li><span class="check" style="background: rgba(124,77,255,0.15); color: var(--secondary);">✓</span> Priority support</li>
+            <li><span class="check" style="background: rgba(124,77,255,0.15); color: var(--secondary);">✓</span> Performance dashboard</li>
+          </ul>
+          <button class="btn btn-premium" style="width: 100%; box-shadow: 0 0 30px rgba(124,77,255,0.3);" onclick="showPaymentModal('Monthly', '1,499')">Choose Monthly</button>
+        </div>
+
+        <!-- Yearly -->
+        <div class="pricing-card scroll-reveal" style="background: linear-gradient(135deg, rgba(255,215,0,0.06), rgba(255,215,0,0.02)); animation-delay: 0.2s;">
+          <div class="pricing-icon" style="background: rgba(255,215,0,0.08); border-color: rgba(255,215,0,0.15);">👑</div>
+          <h3 class="pricing-name">Yearly</h3>
+          <p class="pricing-desc">Best value for dedicated members</p>
+          <div class="pricing-price">
+            <span class="amount">KES 9,999</span>
+            <span class="period">/year</span>
+          </div>
+          <ul class="pricing-features">
+            <li><span class="check" style="background: rgba(255,215,0,0.15); color: var(--accent-gold);">✓</span> Everything in Monthly</li>
+            <li><span class="check" style="background: rgba(255,215,0,0.15); color: var(--accent-gold);">✓</span> Save 44% vs monthly</li>
+            <li><span class="check" style="background: rgba(255,215,0,0.15); color: var(--accent-gold);">✓</span> VIP Telegram group access</li>
+            <li><span class="check" style="background: rgba(255,215,0,0.15); color: var(--accent-gold);">✓</span> Personal betting consultant</li>
+            <li><span class="check" style="background: rgba(255,215,0,0.15); color: var(--accent-gold);">✓</span> Early access to predictions</li>
+            <li><span class="check" style="background: rgba(255,215,0,0.15); color: var(--accent-gold);">✓</span> Custom analysis requests</li>
+          </ul>
+          <button class="btn btn-primary" style="width: 100%;" onclick="showPaymentModal('Yearly', '9,999')">Choose Yearly</button>
+        </div>
+      </div>
+
+      <!-- Trust -->
+      <div class="trust-grid scroll-reveal" style="margin-top: 48px; padding: 32px; border-radius: var(--radius-lg); background: var(--bg-card); border: 1px solid var(--border-subtle);">
+        <div class="trust-item"><div class="icon">🔒</div><div class="title">Secure Payments</div><div class="desc">256-bit SSL encrypted</div></div>
+        <div class="trust-item"><div class="icon">✅</div><div class="title">Money-Back Guarantee</div><div class="desc">7-day satisfaction guarantee</div></div>
+        <div class="trust-item"><div class="icon">⚡</div><div class="title">Instant Access</div><div class="desc">Access immediately after payment</div></div>
+        <div class="trust-item"><div class="icon">💬</div><div class="title">24/7 Support</div><div class="desc">Dedicated support team</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="logo" style="font-size: 1.1rem;">
+            <span class="logo-icon" style="width: 32px; height: 32px; font-size: 15px;">⚡</span>
+            PrimePredict
+          </a>
+          <p>Kenya's most trusted football prediction platform. Expert analysis, premium tips, data-driven insights.</p>
+        </div>
+        <div>
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="#predictions">Free Predictions</a></li>
+            <li><a href="#pricing">Premium Tips</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#results">Results</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Predictions</h4>
+          <ul>
+            <li><a href="#predictions">1X2 Predictions</a></li>
+            <li><a href="#predictions">Over/Under</a></li>
+            <li><a href="#predictions">BTTS</a></li>
+            <li><a href="#predictions">Correct Score</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Support</h4>
+          <ul>
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Contact Us</a></li>
+          </ul>
+        </div>
+      </div>
+      <hr />
+      <div class="footer-bottom">
+        <p>&copy; 2026 PrimePredict. All rights reserved.</p>
+        <div class="footer-socials">
+          <a href="#">Facebook</a>
+          <a href="#">Twitter</a>
+          <a href="#">Telegram</a>
+          <a href="#">WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== PAYMENT MODAL ===== -->
+  <div class="modal-overlay" id="paymentModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closePaymentModal()">✕</button>
+      <div id="paymentContent">
+        <div style="text-align: center;">
+          <div style="font-size: 2.5rem; margin-bottom: 12px;">💳</div>
+          <h2 style="margin-bottom: 8px;">Complete Purchase</h2>
+          <p style="margin-bottom: 20px;">You selected the <strong style="color: var(--primary);" id="selectedPlanName">Monthly</strong> plan</p>
+          <div style="font-size: 2rem; font-weight: 800; color: var(--accent-gold); margin-bottom: 24px;">
+            KES <span id="selectedPlanPrice">1,499</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+            <button onclick="processPayment('M-Pesa')" style="display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: var(--radius-md); border: 1px solid rgba(0,150,50,0.3); background: rgba(0,150,50,0.08); color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; transition: var(--transition-base); width: 100%;">
+              <span style="font-size: 1.5rem;">📱</span>
+              M-Pesa
+              <span style="margin-left: auto; font-size: 0.8rem; color: var(--text-tertiary);">STK Push</span>
+            </button>
+            <button onclick="processPayment('Card')" style="display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: var(--radius-md); border: 1px solid rgba(124,77,255,0.3); background: rgba(124,77,255,0.08); color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; transition: var(--transition-base); width: 100%;">
+              <span style="font-size: 1.5rem;">💳</span>
+              Credit/Debit Card
+              <span style="margin-left: auto; font-size: 0.8rem; color: var(--text-tertiary);">Stripe</span>
+            </button>
+            <button onclick="processPayment('Crypto')" style="display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: var(--radius-md); border: 1px solid rgba(255,215,0,0.3); background: rgba(255,215,0,0.08); color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; transition: var(--transition-base); width: 100%;">
+              <span style="font-size: 1.5rem;">₿</span>
+              Cryptocurrency
+              <span style="margin-left: auto; font-size: 0.8rem; color: var(--text-tertiary);">Coinbase</span>
+            </button>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-tertiary);">
+            🔒 Secured with 256-bit SSL encryption
+          </div>
+        </div>
+      </div>
+      <div id="paymentSuccess" style="display: none; text-align: center;">
+        <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(0,230,118,0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2.5rem;">✅</div>
+        <h2 style="margin-bottom: 8px;">Payment Successful!</h2>
+        <p style="margin-bottom: 24px;">Your plan is now active. Welcome to PrimePredict Premium!</p>
+        <button class="btn btn-primary" onclick="closePaymentModal()">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
+    // ===== DATA =====
+    const predictions = [
+      { id: 1, home: 'Manchester City', away: 'Arsenal', league: 'Premier League', type: '1X2', pred: '1', odds: '1.85', conf: 84, premium: false, time: 'Today, 17:00', cat: '1x2' },
+      { id: 2, home: 'Barcelona', away: 'Real Madrid', league: 'La Liga', type: '1X2', pred: 'X', odds: '3.40', conf: 72, premium: true, time: 'Today, 21:00', cat: '1x2' },
+      { id: 3, home: 'Bayern Munich', away: 'Leipzig', league: 'Bundesliga', type: '1X2', pred: '1', odds: '1.65', conf: 88, premium: false, time: 'Today, 18:30', cat: '1x2' },
+      { id: 4, home: 'Liverpool', away: 'Tottenham', league: 'Premier League', type: 'Over/Under', pred: 'Over 2.5', odds: '1.72', conf: 86, premium: false, time: 'Today, 20:00', cat: 'ou' },
+      { id: 5, home: 'Inter Milan', away: 'Juventus', league: 'Serie A', type: 'Over/Under', pred: 'Under 2.5', odds: '2.10', conf: 76, premium: true, time: 'Today, 19:45', cat: 'ou' },
+      { id: 6, home: 'PSG', away: 'Marseille', league: 'Ligue 1', type: 'BTTS', pred: 'Yes', odds: '1.80', conf: 81, premium: false, time: 'Today, 21:00', cat: 'btts' },
+      { id: 7, home: 'Ajax', away: 'Feyenoord', league: 'Eredivisie', type: 'BTTS', pred: 'No', odds: '2.25', conf: 68, premium: true, time: 'Today, 16:30', cat: 'btts' },
+      { id: 8, home: 'Chelsea', away: 'Man United', league: 'Premier League', type: 'Double Chance', pred: '1X', odds: '1.25', conf: 91, premium: false, time: 'Today, 18:00', cat: 'dc' },
+      { id: 9, home: 'AC Milan', away: 'Napoli', league: 'Serie A', type: 'Double Chance', pred: '12', odds: '1.40', conf: 83, premium: true, time: 'Today, 20:30', cat: 'dc' },
+      { id: 10, home: 'Dortmund', away: 'Leverkusen', league: 'Bundesliga', type: 'HT/FT', pred: '1/1', odds: '3.00', conf: 74, premium: true, time: 'Today, 17:30', cat: 'htft' },
+      { id: 11, home: 'Atletico', away: 'Sevilla', league: 'La Liga', type: 'HT/FT', pred: 'X/1', odds: '4.50', conf: 61, premium: true, time: 'Today, 22:00', cat: 'htft' },
+      { id: 12, home: 'Real Betis', away: 'Valencia', league: 'La Liga', type: 'Correct Score', pred: '2-1', odds: '7.00', conf: 52, premium: true, time: 'Today, 19:00', cat: 'cs' },
+      { id: 13, home: 'Lyon', away: 'Monaco', league: 'Ligue 1', type: 'Correct Score', pred: '1-1', odds: '6.50', conf: 48, premium: true, time: 'Today, 15:00', cat: 'cs' },
+    ];
+
+    const resultsData = [
+      { id: 1, date: '2024-01-20', match: 'Manchester City vs Arsenal', type: '1X2', pred: '1', odds: '1.85', result: 'won' },
+      { id: 2, date: '2024-01-20', match: 'Liverpool vs Tottenham', type: 'Over/Under', pred: 'Over 2.5', odds: '1.72', result: 'won' },
+      { id: 3, date: '2024-01-19', match: 'PSG vs Marseille', type: 'BTTS', pred: 'Yes', odds: '1.80', result: 'lost' },
+      { id: 4, date: '2024-01-19', match: 'Chelsea vs Man United', type: 'Double Chance', pred: '1X', odds: '1.25', result: 'won' },
+      { id: 5, date: '2024-01-18', match: 'Bayern Munich vs Leipzig', type: '1X2', pred: '1', odds: '1.65', result: 'won' },
+      { id: 6, date: '2024-01-18', match: 'Inter Milan vs Juventus', type: 'Over/Under', pred: 'Under 2.5', odds: '2.10', result: 'lost' },
+      { id: 7, date: '2024-01-17', match: 'Barcelona vs Real Madrid', type: '1X2', pred: 'X', odds: '3.40', result: 'pending' },
+      { id: 8, date: '2024-01-17', match: 'AC Milan vs Napoli', type: 'Double Chance', pred: '12', odds: '1.40', result: 'won' },
+      { id: 9, date: '2024-01-16', match: 'Ajax vs Feyenoord', type: 'BTTS', pred: 'No', odds: '2.25', result: 'won' },
+      { id: 10, date: '2024-01-16', match: 'Dortmund vs Leverkusen', type: 'HT/FT', pred: '1/1', odds: '3.00', result: 'lost' },
+    ];
+
+    // ===== STATE =====
+    let activeCategory = 'all';
+    let premiumOnly = false;
+    let resultFilter = 'all';
+
+    // ===== PREDICTION CARD RENDERER =====
+    function renderPredictionCard(p) {
+      const confColor = p.conf >= 80 ? '#00E676' : p.conf >= 60 ? '#FF9100' : '#FF5252';
+      const badgeClass = p.premium ? 'premium' : 'free';
+      const badgeText = p.premium ? '⭐ Premium' : 'Free';
+      return `
+        <div class="pred-card ${p.premium ? 'premium' : ''} animate-fadeIn" style="animation-delay: ${p.id * 50}ms" onclick="showPredictionDetail(${p.id})">
+          <div class="pred-badge ${badgeClass}">${badgeText}</div>
+          <div class="pred-meta">
+            <span class="pred-league">${p.league}</span>
+            <span class="pred-time">${p.time}</span>
+          </div>
+          <div class="pred-teams">
+            <div class="pred-team">
+              <div class="icon">⚽</div>
+              <div class="name">${p.home}</div>
+            </div>
+            <div class="pred-vs">VS</div>
+            <div class="pred-team">
+              <div class="icon">⚽</div>
+              <div class="name">${p.away}</div>
+            </div>
+          </div>
+          <div class="pred-info">
+            <div class="pred-info-item pick">
+              <div class="label">Prediction</div>
+              <div class="value cyan">${p.pred}</div>
+            </div>
+            <div class="pred-info-item odds">
+              <div class="label">Odds</div>
+              <div class="value gold">${p.odds}</div>
+            </div>
+          </div>
+          <div class="pred-type-badge">${p.type}</div>
+          <div class="pred-confidence">
+            <div class="pred-confidence-header">
+              <span>Confidence</span>
+              <span style="color: ${confColor};">${p.conf}%</span>
+            </div>
+            <div class="confidence-bar">
+              <div class="confidence-fill" style="width: ${p.conf}%; background: linear-gradient(90deg, ${confColor}, var(--primary));"></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderPredictions() {
+      const filtered = predictions.filter(p => {
+        const catMatch = activeCategory === 'all' || p.cat === activeCategory;
+        const premMatch = !premiumOnly || p.premium;
+        return catMatch && premMatch;
+      });
+      document.getElementById('predCount').textContent = filtered.length;
+      const grid = document.getElementById('predictionsGrid');
+      grid.innerHTML = filtered.map(p => renderPredictionCard(p)).join('');
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle);">
+            <div style="font-size: 3rem; margin-bottom: 16px;">🔍</div>
+            <h3 style="margin-bottom: 8px;">No Predictions Found</h3>
+            <p style="margin-bottom: 20px;">Try selecting a different category or check back later.</p>
+            <button class="btn btn-primary" onclick="filterPredictions('all'); premiumOnly=false; document.getElementById('premiumToggle').textContent='⭐ Premium Only';">View All</button>
+          </div>
+        `;
+      }
+    }
+
+    function filterPredictions(category) {
+      activeCategory = category;
+      document.querySelectorAll('#leagueTabs .league-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.category === category);
+      });
+      renderPredictions();
+    }
+
+    function togglePremiumFilter() {
+      premiumOnly = !premiumOnly;
+      document.getElementById('premiumToggle').textContent = premiumOnly ? '⭐ Showing Premium' : '⭐ Premium Only';
+      renderPredictions();
+    }
+
+    // ===== RESULT TABLE =====
+    function renderResults() {
+      const filtered = resultFilter === 'all' ? resultsData : resultsData.filter(r => r.result === resultFilter);
+      const tbody = document.getElementById('resultsTableBody');
+      tbody.innerHTML = filtered.map(r => {
+        const badgeClass = r.result === 'won' ? 'badge-win' : r.result === 'lost' ? 'badge-loss' : 'badge-pending';
+        const badgeText = r.result.charAt(0).toUpperCase() + r.result.slice(1);
+        return `
+          <tr>
+            <td>${r.date}</td>
+            <td style="color: #fff; font-weight: 600;">${r.match}</td>
+            <td style="color: var(--primary);">${r.type}</td>
+            <td style="color: #fff; font-weight: 700;">${r.pred}</td>
+            <td style="color: var(--accent-gold); font-weight: 700;">${r.odds}</td>
+            <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+          </tr>
+        `;
+      }).join('');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--text-tertiary);">No results found.</td></tr>`;
+      }
+    }
+
+    function filterResults(filter) {
+      resultFilter = filter;
+      document.querySelectorAll('#resultFilters .league-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.textContent.toLowerCase() === filter || (filter === 'all' && tab.textContent === 'All'));
+      });
+      renderResults();
+    }
+
+    // ===== PREDICTION DETAIL MODAL =====
+    function showPredictionDetail(id) {
+      const p = predictions.find(x => x.id === id);
+      if (!p) return;
+      const confColor = p.conf >= 80 ? '#00E676' : p.conf >= 60 ? '#FF9100' : '#FF5252';
+      const modal = document.getElementById('paymentModal');
+      const content = document.getElementById('paymentContent');
+      const success = document.getElementById('paymentSuccess');
+      success.style.display = 'none';
+      content.style.display = 'block';
+      content.innerHTML = `
+        <div style="text-align: center;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 20px;">
+            <div style="text-align: center; flex: 1;">
+              <div style="font-size: 2rem; margin-bottom: 4px;">⚽</div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: #fff;">${p.home}</div>
+            </div>
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--gradient-primary); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800; color: var(--bg-primary); flex-shrink: 0;">VS</div>
+            <div style="text-align: center; flex: 1;">
+              <div style="font-size: 2rem; margin-bottom: 4px;">⚽</div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: #fff;">${p.away}</div>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px;">
+            <div style="padding: 10px; border-radius: 8px; background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.1);">
+              <div style="font-size: 0.7rem; color: var(--text-tertiary);">Pick</div>
+              <div style="font-size: 1.1rem; font-weight: 800; color: var(--primary);">${p.pred}</div>
+            </div>
+            <div style="padding: 10px; border-radius: 8px; background: rgba(255,215,0,0.06); border: 1px solid rgba(255,215,0,0.1);">
+              <div style="font-size: 0.7rem; color: var(--text-tertiary);">Odds</div>
+              <div style="font-size: 1.1rem; font-weight: 800; color: var(--accent-gold);">${p.odds}</div>
+            </div>
+            <div style="padding: 10px; border-radius: 8px; background: rgba(0,230,118,0.06); border: 1px solid rgba(0,230,118,0.1);">
+              <div style="font-size: 0.7rem; color: var(--text-tertiary);">Confidence</div>
+              <div style="font-size: 1.1rem; font-weight: 800; color: ${confColor};">${p.conf}%</div>
+            </div>
+          </div>
+          <div style="text-align: left; padding: 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.03); margin-bottom: 20px;">
+            <h4 style="font-size: 0.9rem; margin-bottom: 8px;">📊 Analysis</h4>
+            <p style="font-size: 0.85rem; line-height: 1.7;">
+              Based on recent form, head-to-head records, and advanced statistical models,
+              this prediction has strong potential. ${p.home} have won 4 of their last 5 matches,
+              while ${p.away} have struggled away from home.
+            </p>
+            <div style="margin-top: 12px;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">
+                <span>${p.home} Form</span>
+                <span>✅ ✅ ✅ ✅ ❌</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
+                <span>${p.away} Form</span>
+                <span>✅ ❌ ✅ ❌ ❌</span>
+              </div>
+            </div>
+          </div>
+          ${p.premium ? `
+            <div style="padding: 16px; border-radius: var(--radius-md); background: rgba(124,77,255,0.08); border: 1px solid rgba(124,77,255,0.15); margin-bottom: 16px;">
+              <p style="font-size: 0.85rem;">⭐ This is a <strong style="color: var(--secondary);">Premium</strong> prediction. <a href="#pricing" style="color: var(--accent-gold);">Subscribe</a> to unlock full analysis.</p>
+            </div>
+          ` : `
+            <button class="btn btn-primary" style="width: 100%;" onclick="closePaymentModal()">Close</button>
+          `}
+        </div>
+      `;
+      modal.classList.add('open');
+    }
+
+    // ===== PAYMENT MODAL =====
+    function showPaymentModal(name, price) {
+      document.getElementById('selectedPlanName').textContent = name;
+      document.getElementById('selectedPlanPrice').textContent = price;
+      const modal = document.getElementById('paymentModal');
+      const content = document.getElementById('paymentContent');
+      const success = document.getElementById('paymentSuccess');
+      content.style.display = 'block';
+      success.style.display = 'none';
+      modal.classList.add('open');
+    }
+
+    function closePaymentModal() {
+      document.getElementById('paymentModal').classList.remove('open');
+    }
+
+    function processPayment(method) {
+      const content = document.getElementById('paymentContent');
+      const success = document.getElementById('paymentSuccess');
+      content.style.display = 'none';
+      success.style.display = 'block';
+    }
+
+    // ===== NAVBAR SCROLL EFFECT =====
+    window.addEventListener('scroll', () => {
+      const nav = document.getElementById('navbar');
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    // ===== MOBILE MENU =====
+    function toggleMobileMenu() {
+      document.getElementById('mobileMenu').classList.toggle('open');
+    }
+    function closeMobileMenu() {
+      document.getElementById('mobileMenu').classList.remove('open');
+    }
+
+    // ===== SCROLL REVEAL =====
+    function handleScrollReveal() {
+      const reveals = document.querySelectorAll('.scroll-reveal');
+      const windowHeight = window.innerHeight;
+      reveals.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < windowHeight - 100) {
+          el.classList.add('revealed');
+        }
+      });
+    }
+    window.addEventListener('scroll', handleScrollReveal);
+    window.addEventListener('load', handleScrollReveal);
+
+    // ===== SMOOTH SCROLL FOR ANCHOR LINKS =====
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          closeMobileMenu();
+        }
+      });
+    });
+
+    // ===== INIT =====
+    renderPredictions();
+    renderResults();
+    handleScrollReveal();
+
+    // Close modal on overlay click
+    document.getElementById('paymentModal').addEventListener('click', function(e) {
+      if (e.target === this) closePaymentModal();
+    });
+
+    console.log('🚀 PrimePredict - Premium Football Predictions');
+    console.log('📊 Loaded', predictions.length, 'predictions,', resultsData.length, 'results');
+  </script>
+</body>
 </html>
 

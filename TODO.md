@@ -14,3 +14,9 @@
 - [ ] Update `/register` page - Show verification prompt after signup
 - [ ] Update Navbar - Add mobile link for new pages
 
+## ✅ Phase X: Admin User Creation
+
+### Backend
+- [x] Create seed script (`backend/scripts/seedAdmin.js`) to create admin user
+- [x] Run the seed script with ADMIN_EMAIL and ADMIN_PASSWORD configured locally
+
