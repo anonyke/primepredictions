@@ -1,10 +1,80 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Reset & Base Styles */
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root {
+  /* Fonts */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+
+  /* Colors */
+  --bg-primary: #0A0E27;
+  --bg-secondary: #0F1535;
+  --bg-tertiary: #131849;
+  --bg-card: #131849;
+  --bg-card-hover: #1C2260;
+
+  --text-primary: #F5F7FF;
+  --text-secondary: #B0B8D1;
+  --text-tertiary: #6B7394;
+  --text-muted: #4A5173;
+
+  --primary: #00E5FF;
+  --primary-light: #5FF5FF;
+  --primary-dark: #00B8CC;
+
+  --secondary: #7C4DFF;
+  --secondary-light: #B388FF;
+
+  --accent-green: #00E676;
+  --accent-red: #FF5252;
+  --accent-orange: #FF9100;
+  --accent-gold: #FFD700;
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #00E5FF 0%, #7C4DFF 100%);
+  --gradient-secondary: linear-gradient(135deg, #7C4DFF 0%, #FFD700 100%);
+  --gradient-bg: radial-gradient(1200px 800px at 80% -10%, rgba(124, 77, 255, 0.12), transparent 60%),
+                 radial-gradient(1000px 600px at -10% 10%, rgba(0, 229, 255, 0.08), transparent 50%),
+                 #0A0E27;
+
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-primary: rgba(0, 229, 255, 0.25);
+  --border-secondary: rgba(124, 77, 255, 0.3);
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 24px rgba(0, 229, 255, 0.15);
+  --shadow-glow-secondary: 0 0 24px rgba(124, 77, 255, 0.25);
+
+  /* Transitions */
+  --transition-fast: all 0.2s ease;
+  --transition-base: all 0.3s ease;
+  --transition-slow: all 0.6s ease;
+
+  /* Container */
+  --container-width: 1200px;
+
+  /* Section */
+  --section-padding: 80px 0;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
 *, *::before, *::after {
   margin: 0;
   padding: 0;
@@ -14,17 +84,27 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   font-family: var(--font-sans);
-  background: var(--bg-primary);
+  background: var(--gradient-bg);
   color: var(--text-primary);
   line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+img, svg {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
 }
 
 /* Custom Scrollbar */
@@ -38,12 +118,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--text-tertiary);
+  background: var(--text-muted);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
+  background: var(--text-tertiary);
 }
 
 /* Selection */
@@ -52,7 +132,9 @@ body {
   color: var(--bg-primary);
 }
 
-/* Typography */
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   font-weight: 700;
@@ -80,15 +162,19 @@ a:hover {
   color: var(--primary-light);
 }
 
-/* Container */
+/* ============================================================
+   CONTAINER
+   ============================================================ */
 .container {
   width: 100%;
   max-width: var(--container-width);
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 24px;
 }
 
-/* Buttons */
+/* ============================================================
+   BUTTONS
+   ============================================================ */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -115,7 +201,7 @@ a:hover {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
   transition: var(--transition-base);
 }
 
@@ -142,7 +228,7 @@ a:hover {
 }
 
 .btn-secondary:hover {
-  background: var(--gradient-card);
+  background: var(--bg-card-hover);
   transform: translateY(-2px);
   color: var(--primary);
 }
@@ -155,7 +241,7 @@ a:hover {
 
 .btn-premium:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0 30px rgba(124, 77, 255, 0.3);
+  box-shadow: 0 0 30px rgba(124, 77, 255, 0.35);
   color: var(--bg-primary);
 }
 
@@ -185,7 +271,9 @@ a:hover {
   transform: none;
 }
 
-/* Cards */
+/* ============================================================
+   CARDS
+   ============================================================ */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
@@ -196,7 +284,7 @@ a:hover {
 
 .card:hover {
   border-color: var(--border-primary);
-  box-shadow: var(--shadow-glow);
+  box-shadow: var(--shadow-card);
   transform: translateY(-4px);
 }
 
@@ -222,7 +310,9 @@ a:hover {
   opacity: 0.6;
 }
 
-/* Section Styles */
+/* ============================================================
+   SECTIONS
+   ============================================================ */
 .section {
   padding: var(--section-padding);
   position: relative;
@@ -247,7 +337,9 @@ a:hover {
   margin: 0 auto;
 }
 
-/* Grid Layouts */
+/* ============================================================
+   GRIDS
+   ============================================================ */
 .grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -266,7 +358,9 @@ a:hover {
   gap: 20px;
 }
 
-/* Tables */
+/* ============================================================
+   TABLES
+   ============================================================ */
 .table-container {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
@@ -280,7 +374,7 @@ a:hover {
 }
 
 .table-container th {
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   padding: 16px 20px;
   text-align: left;
   font-size: 0.8rem;
@@ -305,7 +399,9 @@ a:hover {
   border-bottom: none;
 }
 
-/* Badges */
+/* ============================================================
+   BADGES
+   ============================================================ */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -343,7 +439,9 @@ a:hover {
   color: var(--primary);
 }
 
-/* Confidence Bar */
+/* ============================================================
+   CONFIDENCE BAR
+   ============================================================ */
 .confidence-bar {
   width: 100%;
   height: 6px;
@@ -362,7 +460,9 @@ a:hover {
 .confidence-fill.medium { background: var(--accent-orange); }
 .confidence-fill.low { background: var(--accent-red); }
 
-/* Status Indicators */
+/* ============================================================
+   STATUS DOTS
+   ============================================================ */
 .status-dot {
   width: 8px;
   height: 8px;
@@ -375,7 +475,9 @@ a:hover {
 .status-dot.lost { background: var(--accent-red); box-shadow: 0 0 8px var(--accent-red); }
 .status-dot.upcoming { background: var(--primary); box-shadow: 0 0 8px var(--primary); }
 
-/* Form Elements */
+/* ============================================================
+   FORMS
+   ============================================================ */
 .form-group {
   margin-bottom: 20px;
 }
@@ -391,7 +493,7 @@ a:hover {
 .form-input {
   width: 100%;
   padding: 12px 16px;
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   color: var(--text-primary);
@@ -413,7 +515,7 @@ a:hover {
 .form-select {
   width: 100%;
   padding: 12px 16px;
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   color: var(--text-primary);
@@ -426,7 +528,9 @@ a:hover {
   background-position: right 12px center;
 }
 
-/* Animations */
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -529,47 +633,20 @@ a:hover {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.6s ease forwards;
-}
+.animate-fadeIn { animation: fadeIn 0.6s ease forwards; }
+.animate-fadeInUp { animation: fadeInUp 0.7s ease forwards; }
+.animate-fadeInDown { animation: fadeInDown 0.5s ease forwards; }
+.animate-slideInLeft { animation: slideInLeft 0.6s ease forwards; }
+.animate-slideInRight { animation: slideInRight 0.6s ease forwards; }
+.animate-scaleIn { animation: scaleIn 0.4s ease forwards; }
+.animate-float { animation: float 4s ease-in-out infinite; }
+.animate-floatSlow { animation: floatSlow 6s ease-in-out infinite; }
+.animate-glow { animation: glow 3s ease-in-out infinite; }
+.animate-rotateSlow { animation: rotateSlow 20s linear infinite; }
 
-.animate-fadeInUp {
-  animation: fadeInUp 0.7s ease forwards;
-}
-
-.animate-fadeInDown {
-  animation: fadeInDown 0.5s ease forwards;
-}
-
-.animate-slideInLeft {
-  animation: slideInLeft 0.6s ease forwards;
-}
-
-.animate-slideInRight {
-  animation: slideInRight 0.6s ease forwards;
-}
-
-.animate-scaleIn {
-  animation: scaleIn 0.4s ease forwards;
-}
-
-.animate-float {
-  animation: float 4s ease-in-out infinite;
-}
-
-.animate-floatSlow {
-  animation: floatSlow 6s ease-in-out infinite;
-}
-
-.animate-glow {
-  animation: glow 3s ease-in-out infinite;
-}
-
-.animate-rotateSlow {
-  animation: rotateSlow 20s linear infinite;
-}
-
-/* Scroll Reveal Animations */
+/* ============================================================
+   SCROLL REVEAL
+   ============================================================ */
 .scroll-reveal {
   opacity: 0;
   transform: translateY(30px);
@@ -613,7 +690,9 @@ a:hover {
 .delay-700 { animation-delay: 700ms; }
 .delay-800 { animation-delay: 800ms; }
 
-/* Loading Skeleton */
+/* ============================================================
+   LOADING SKELETON
+   ============================================================ */
 .skeleton {
   background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-card-hover) 50%, var(--bg-tertiary) 75%);
   background-size: 200% 100%;
@@ -621,18 +700,12 @@ a:hover {
   border-radius: var(--radius-sm);
 }
 
-.skeleton-text {
-  height: 16px;
-  margin-bottom: 8px;
-}
+.skeleton-text { height: 16px; margin-bottom: 8px; }
+.skeleton-title { height: 24px; width: 60%; margin-bottom: 12px; }
 
-.skeleton-title {
-  height: 24px;
-  width: 60%;
-  margin-bottom: 12px;
-}
-
-/* Modal / Overlay */
+/* ============================================================
+   MODAL
+   ============================================================ */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -658,7 +731,9 @@ a:hover {
   animation: scaleIn 0.3s ease;
 }
 
-/* Responsive */
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
 @media (max-width: 1024px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
   h1 { font-size: 2.8rem; }
@@ -681,7 +756,9 @@ a:hover {
   .btn-lg { padding: 14px 24px; font-size: 0.9rem; }
 }
 
-/* Utility Classes */
+/* ============================================================
+   UTILITIES
+   ============================================================ */
 .text-gradient {
   background: var(--gradient-primary);
   -webkit-background-clip: text;

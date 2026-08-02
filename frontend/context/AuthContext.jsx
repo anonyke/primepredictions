@@ -60,7 +60,7 @@ export function AuthProvider({ children }) {
         
         setToken(newToken);
         setUser(userData);
-        return { success: true };
+        return { success: true, user: userData };
       }
       throw new Error('Invalid email or password');
     } catch (err) {

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import PredictionCard from '../../components/PredictionCard';
+import { predictionsApi } from '../../services/api';
 
 const categories = [
   { id: 'all', label: 'All Predictions', icon: '📋' },
@@ -15,31 +16,26 @@ const categories = [
   { id: 'correct-score', label: 'Correct Score', icon: '✅' },
 ];
 
-const allPredictions = [
-  // 1X2
-  { id: 1, match: 'Manchester City vs Arsenal', league: 'Premier League', type: '1X2', prediction: '1', odds: '1.85', confidence: 84, isPremium: false, time: 'Today, 17:00' },
-  { id: 2, match: 'Barcelona vs Real Madrid', league: 'La Liga', type: '1X2', prediction: 'X', odds: '3.40', confidence: 72, isPremium: true, time: 'Today, 21:00' },
-  { id: 3, match: 'Bayern Munich vs Leipzig', league: 'Bundesliga', type: '1X2', prediction: '1', odds: '1.65', confidence: 88, isPremium: false, time: 'Today, 18:30' },
-  // Over/Under
-  { id: 4, match: 'Liverpool vs Tottenham', league: 'Premier League', type: 'Over/Under', prediction: 'Over 2.5', odds: '1.72', confidence: 86, isPremium: false, time: 'Today, 20:00' },
-  { id: 5, match: 'Inter Milan vs Juventus', league: 'Serie A', type: 'Over/Under', prediction: 'Under 2.5', odds: '2.10', confidence: 76, isPremium: true, time: 'Today, 19:45' },
-  // BTTS
-  { id: 6, match: 'PSG vs Marseille', league: 'Ligue 1', type: 'BTTS', prediction: 'Yes', odds: '1.80', confidence: 81, isPremium: false, time: 'Today, 21:00' },
-  { id: 7, match: 'Ajax vs Feyenoord', league: 'Eredivisie', type: 'BTTS', prediction: 'No', odds: '2.25', confidence: 68, isPremium: true, time: 'Today, 16:30' },
-  // Double Chance
-  { id: 8, match: 'Chelsea vs Manchester Utd', league: 'Premier League', type: 'Double Chance', prediction: '1X', odds: '1.25', confidence: 91, isPremium: false, time: 'Today, 18:00' },
-  { id: 9, match: 'AC Milan vs Napoli', league: 'Serie A', type: 'Double Chance', prediction: '12', odds: '1.40', confidence: 83, isPremium: true, time: 'Today, 20:30' },
-  // HT/FT
-  { id: 10, match: 'Dortmund vs Leverkusen', league: 'Bundesliga', type: 'HT/FT', prediction: '1/1', odds: '3.00', confidence: 74, isPremium: true, time: 'Today, 17:30' },
-  { id: 11, match: 'Atletico vs Sevilla', league: 'La Liga', type: 'HT/FT', prediction: 'X/1', odds: '4.50', confidence: 61, isPremium: true, time: 'Today, 22:00' },
-  // Correct Score
-  { id: 12, match: 'Real Betis vs Valencia', league: 'La Liga', type: 'Correct Score', prediction: '2-1', odds: '7.00', confidence: 52, isPremium: true, time: 'Today, 19:00' },
-  { id: 13, match: 'Lyon vs Monaco', league: 'Ligue 1', type: 'Correct Score', prediction: '1-1', odds: '6.50', confidence: 48, isPremium: true, time: 'Today, 15:00' },
-];
+function mapPrediction(p) {
+  return {
+    id: p._id,
+    match: `${p.matchName?.home || ''} vs ${p.matchName?.away || ''}`,
+    league: p.league || '',
+    type: p.category || '1X2',
+    prediction: p.prediction || '',
+    odds: p.odds || '',
+    confidence: p.confidence || 0,
+    isPremium: p.isPremium || false,
+    time: p.kickoff ? new Date(p.kickoff).toLocaleString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Today',
+  };
+}
 
 export default function PredictionsPage() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [showPremiumOnly, setShowPremiumOnly] = useState(false);
+  const [allPredictions, setAllPredictions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -50,6 +46,13 @@ export default function PredictionsPage() {
       const found = categories.find(c => c.id === cat);
       if (found) setActiveCategory(cat);
     }
+  }, []);
+
+  useEffect(() => {
+    predictionsApi.list({ limit: 100 })
+      .then((data) => setAllPredictions((data.predictions || []).map(mapPrediction)))
+      .catch((err) => setError(err.message || 'Failed to load predictions'))
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = allPredictions.filter(p => {

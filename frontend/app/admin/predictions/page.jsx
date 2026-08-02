@@ -1,25 +1,119 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 import { useAuth } from '../../../context/AuthContext';
+import { predictionsApi, adminApi } from '../../../services/api';
 
-const initialPredictions = [
-  { id: 1, match: 'Manchester City vs Arsenal', league: 'Premier League', type: '1X2', prediction: '1', odds: '1.85', confidence: 84, status: 'pending', date: '2024-01-20', premium: false },
-  { id: 2, match: 'Barcelona vs Real Madrid', league: 'La Liga', type: '1X2', prediction: 'X', odds: '3.40', confidence: 72, status: 'pending', date: '2024-01-20', premium: true },
-  { id: 3, match: 'Liverpool vs Tottenham', league: 'Premier League', type: 'Over/Under', prediction: 'Over 2.5', odds: '1.72', confidence: 86, status: 'won', date: '2024-01-19', premium: false },
-  { id: 4, match: 'PSG vs Marseille', league: 'Ligue 1', type: 'BTTS', prediction: 'Yes', odds: '1.80', confidence: 81, status: 'lost', date: '2024-01-19', premium: false },
-];
+const emptyForm = {
+  match: '', league: 'Premier League', type: '1X2', prediction: '',
+  odds: '', confidence: 70, premium: false, featured: false,
+};
 
 export default function AdminPredictionsPage() {
   const { user, isAdmin, loading: authLoading } = useAuth();
+  const [predictions, setPredictions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
+
+  const loadPredictions = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await predictionsApi.list({ limit: 100 });
+      setPredictions(data.predictions || []);
+      setError('');
+    } catch (err) {
+      setError(err.message || 'Failed to load predictions');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
       window.location.href = '/login';
     }
   }, [user, isAdmin, authLoading]);
+
+  useEffect(() => {
+    if (user && isAdmin) {
+      loadPredictions();
+    }
+  }, [user, isAdmin, loadPredictions]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
+
+    const [home, away] = form.match.split(' vs ').map(s => s?.trim()) || ['', ''];
+    const payload = {
+      matchName: { home: home || form.match, away: away || 'TBD' },
+      league: form.league,
+      category: form.type,
+      prediction: form.prediction,
+      odds: form.odds,
+      confidence: parseInt(form.confidence) || 70,
+      kickoff: new Date().toISOString(),
+      isPremium: form.premium,
+      isFeatured: form.featured,
+    };
+
+    try {
+      if (editingId) {
+        await adminApi.updatePrediction(editingId, payload);
+      } else {
+        await adminApi.createPrediction(payload);
+      }
+      setShowForm(false);
+      setEditingId(null);
+      setForm(emptyForm);
+      await loadPredictions();
+    } catch (err) {
+      setError(err.message || 'Failed to save prediction');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEdit = (prediction) => {
+    setForm({
+      match: `${prediction.matchName?.home || ''} vs ${prediction.matchName?.away || ''}`,
+      league: prediction.league || 'Premier League',
+      type: prediction.category || '1X2',
+      prediction: prediction.prediction || '',
+      odds: prediction.odds || '',
+      confidence: prediction.confidence || 70,
+      premium: prediction.isPremium || false,
+      featured: prediction.isFeatured || false,
+    });
+    setEditingId(prediction._id);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this prediction?')) return;
+    try {
+      await adminApi.deletePrediction(id);
+      await loadPredictions();
+    } catch (err) {
+      setError(err.message || 'Failed to delete prediction');
+    }
+  };
+
+  const handleResult = async (prediction, status) => {
+    try {
+      await adminApi.updatePredictionResult(prediction._id, { status });
+      await loadPredictions();
+    } catch (err) {
+      setError(err.message || 'Failed to update result');
+    }
+  };
 
   if (authLoading || !user || !isAdmin) {
     return (
@@ -36,35 +130,7 @@ export default function AdminPredictionsPage() {
     );
   }
 
-  const [predictions, setPredictions] = useState(initialPredictions);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState({
-    match: '', league: 'Premier League', type: '1X2', prediction: '',
-    odds: '', confidence: 70, premium: false,
-  });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (editingId) {
-      setPredictions(predictions.map(p => p.id === editingId ? { ...p, ...form } : p));
-    } else {
-      setPredictions([...predictions, { ...form, id: Date.now(), status: 'pending', date: new Date().toISOString().split('T')[0] }]);
-    }
-    setShowForm(false);
-    setEditingId(null);
-    setForm({ match: '', league: 'Premier League', type: '1X2', prediction: '', odds: '', confidence: 70, premium: false });
-  };
-
-  const handleEdit = (prediction) => {
-    setForm(prediction);
-    setEditingId(prediction.id);
-    setShowForm(true);
-  };
-
-  const handleDelete = (id) => {
-    setPredictions(predictions.filter(p => p.id !== id));
-  };
+  const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
 
   return (
     <div>
@@ -78,7 +144,7 @@ export default function AdminPredictionsPage() {
             <p style={{ color: '#6B7394' }}>{predictions.length} predictions total</p>
           </div>
           <button
-            onClick={() => { setShowForm(true); setEditingId(null); setForm({ match: '', league: 'Premier League', type: '1X2', prediction: '', odds: '', confidence: 70, premium: false }); }}
+            onClick={() => { setShowForm(true); setEditingId(null); setForm(emptyForm); }}
             style={{
               padding: '12px 24px',
               borderRadius: 10,
@@ -94,6 +160,20 @@ export default function AdminPredictionsPage() {
             + Add Prediction
           </button>
         </div>
+
+        {error && (
+          <div style={{
+            padding: '12px 16px',
+            borderRadius: 10,
+            background: 'rgba(255,82,82,0.1)',
+            border: '1px solid rgba(255,82,82,0.2)',
+            color: '#FF5252',
+            fontSize: 13,
+            marginBottom: 20,
+          }}>
+            {error}
+          </div>
+        )}
 
         {/* Add/Edit Form */}
         {showForm && (
@@ -125,6 +205,8 @@ export default function AdminPredictionsPage() {
                     <option>Serie A</option>
                     <option>Ligue 1</option>
                     <option>Eredivisie</option>
+                    <option>Champions League</option>
+                    <option>Europa League</option>
                   </select>
                 </div>
                 <div>
@@ -157,14 +239,21 @@ export default function AdminPredictionsPage() {
                     style={{ width: '100%', padding: '10px 14px', background: '#0F1535', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#fff', fontSize: 14, fontFamily: 'Inter', outline: 'none', boxSizing: 'border-box' }} />
                 </div>
               </div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 16, cursor: 'pointer' }}>
-                <input type="checkbox" checked={form.premium} onChange={(e) => setForm({ ...form, premium: e.target.checked })}
-                  style={{ width: 16, height: 16, accentColor: '#7C4DFF' }} />
-                <span style={{ color: '#B0B8D1', fontSize: 14 }}>Premium Prediction</span>
-              </label>
+              <div style={{ display: 'flex', gap: 24, marginTop: 16, flexWrap: 'wrap' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={form.premium} onChange={(e) => setForm({ ...form, premium: e.target.checked })}
+                    style={{ width: 16, height: 16, accentColor: '#7C4DFF' }} />
+                  <span style={{ color: '#B0B8D1', fontSize: 14 }}>Premium Prediction</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })}
+                    style={{ width: 16, height: 16, accentColor: '#00E5FF' }} />
+                  <span style={{ color: '#B0B8D1', fontSize: 14 }}>Featured Match</span>
+                </label>
+              </div>
               <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
-                <button type="submit" style={{ padding: '10px 24px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #00E5FF, #7C4DFF)', color: '#0A0E27', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'Inter' }}>
-                  {editingId ? 'Update Prediction' : 'Add Prediction'}
+                <button type="submit" disabled={saving} style={{ padding: '10px 24px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #00E5FF, #7C4DFF)', color: '#0A0E27', fontSize: 14, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'Inter' }}>
+                  {saving ? 'Saving...' : (editingId ? 'Update Prediction' : 'Add Prediction')}
                 </button>
                 <button type="button" onClick={() => setShowForm(false)} style={{ padding: '10px 24px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: '#B0B8D1', fontSize: 14, cursor: 'pointer', fontFamily: 'Inter' }}>
                   Cancel
@@ -177,6 +266,17 @@ export default function AdminPredictionsPage() {
 
         {/* Predictions Table */}
         <div style={{ background: '#131849', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, overflow: 'hidden' }}>
+          {loading ? (
+            <div style={{ padding: 60, textAlign: 'center' }}>
+              <div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid rgba(0,229,255,0.2)', borderTopColor: '#00E5FF', margin: '0 auto 16px', animation: 'spin 1s linear infinite' }} />
+              <p style={{ color: '#6B7394' }}>Loading predictions...</p>
+            </div>
+          ) : predictions.length === 0 ? (
+            <div style={{ padding: 60, textAlign: 'center' }}>
+              <p style={{ color: '#6B7394', marginBottom: 8 }}>No predictions yet.</p>
+              <p style={{ color: '#4A5173', fontSize: 14 }}>Click "+ Add Prediction" to create today's predictions.</p>
+            </div>
+          ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
@@ -192,10 +292,14 @@ export default function AdminPredictionsPage() {
             </thead>
             <tbody>
               {predictions.map((p) => (
-                <tr key={p.id}>
-                  <td style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#fff', fontSize: 14, fontWeight: 600 }}>{p.match}</td>
+                <tr key={p._id}>
+                  <td style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#fff', fontSize: 14, fontWeight: 600 }}>
+                    {p.matchName?.home} vs {p.matchName?.away}
+                    {p.isPremium && <span style={{ marginLeft: 8, fontSize: 11, padding: '2px 6px', borderRadius: 4, background: 'rgba(124,77,255,0.2)', color: '#B388FF' }}>PREMIUM</span>}
+                    {p.isFeatured && <span style={{ marginLeft: 4, fontSize: 11, padding: '2px 6px', borderRadius: 4, background: 'rgba(0,229,255,0.15)', color: '#00E5FF' }}>FEATURED</span>}
+                  </td>
                   <td style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#B0B8D1', fontSize: 13 }}>{p.league}</td>
-                  <td style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#00E5FF', fontSize: 14 }}>{p.type}</td>
+                  <td style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#00E5FF', fontSize: 14 }}>{p.category}</td>
                   <td style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#fff', fontSize: 14, fontWeight: 700 }}>{p.prediction}</td>
                   <td style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#FFD700', fontSize: 14, fontWeight: 700 }}>{p.odds}</td>
                   <td style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#B0B8D1', fontSize: 14 }}>{p.confidence}%</td>
@@ -205,22 +309,26 @@ export default function AdminPredictionsPage() {
                       background: p.status === 'won' ? 'rgba(0,230,118,0.1)' : p.status === 'lost' ? 'rgba(255,82,82,0.1)' : 'rgba(255,145,0,0.1)',
                       color: p.status === 'won' ? '#00E676' : p.status === 'lost' ? '#FF5252' : '#FF9100',
                     }}>
-                      {p.status}
+                      {p.status || 'pending'}
                     </span>
                   </td>
                   <td style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                    <div style={{ display: 'flex', gap: 8 }}>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                       <button onClick={() => handleEdit(p)} style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid rgba(0,229,255,0.2)', background: 'transparent', color: '#00E5FF', fontSize: 12, cursor: 'pointer' }}>Edit</button>
-                      <button onClick={() => handleDelete(p.id)} style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid rgba(255,82,82,0.3)', background: 'rgba(255,82,82,0.1)', color: '#FF5252', fontSize: 12, cursor: 'pointer' }}>Delete</button>
+                      <button onClick={() => handleResult(p, 'won')} style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid rgba(0,230,118,0.3)', background: 'rgba(0,230,118,0.1)', color: '#00E676', fontSize: 12, cursor: 'pointer' }}>Won</button>
+                      <button onClick={() => handleResult(p, 'lost')} style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid rgba(255,82,82,0.3)', background: 'rgba(255,82,82,0.1)', color: '#FF5252', fontSize: 12, cursor: 'pointer' }}>Lost</button>
+                      <button onClick={() => handleDelete(p._id)} style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid rgba(255,82,82,0.3)', background: 'rgba(255,82,82,0.1)', color: '#FF5252', fontSize: 12, cursor: 'pointer' }}>Delete</button>
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          )}
         </div>
       </main>
       <Footer />
     </div>
   );
 }
+
