@@ -2,6 +2,7 @@ import User from '../models/User.js';
 import Prediction from '../models/Prediction.js';
 import Payment from '../models/Payment.js';
 import Subscription from '../models/Subscription.js';
+import { escapeRegex } from '../utils/validators.js';
 
 export async function adminSummary(req, res) {
   try {
@@ -37,9 +38,10 @@ export async function getUsers(req, res) {
     const query = {};
 
     if (search) {
+      const safe = escapeRegex(String(search));
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
+        { name: { $regex: safe, $options: 'i' } },
+        { email: { $regex: safe, $options: 'i' } },
       ];
     }
     if (role) query.role = role;

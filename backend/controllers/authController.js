@@ -1,12 +1,13 @@
 import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
 import { signJWT } from '../utils/jwt.js';
+import { sanitizeHtml } from '../utils/validators.js';
 
 import { sendWelcomeEmail, sendPasswordResetEmail } from '../services/email.js';
 
 export async function register(req, res) {
   try {
-    const { name, email, password } = req.body;
+    let { name, email, password } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Name, email, and password are required' });
@@ -16,7 +17,11 @@ export async function register(req, res) {
       return res.status(400).json({ error: 'Password must be at least 6 characters' });
     }
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    // sanitize inputs
+    name = sanitizeHtml(String(name).trim());
+    email = sanitizeHtml(String(email).trim()).toLowerCase();
+
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ error: 'Email already registered' });
     }
@@ -30,7 +35,7 @@ export async function register(req, res) {
 
     const user = await User.create({
       name,
-      email: email.toLowerCase(),
+      email,
       passwordHash,
       verificationToken,
     });
@@ -71,6 +76,10 @@ export async function login(req, res) {
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ error: 'Invalid input types' });
     }
 
     const user = await User.findOne({ email: email.toLowerCase() });
@@ -149,6 +158,11 @@ export async function verifyEmail(req, res) {
 export async function requestPasswordReset(req, res) {
   try {
     const { email } = req.body;
+
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ error: 'A valid email is required' });
+    }
+
     const user = await User.findOne({ email: email.toLowerCase() });
 
     if (!user) {

@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
 
 const AuthContext = createContext({
   user: null,
@@ -26,7 +27,7 @@ export function AuthProvider({ children }) {
     try {
       const storedToken = window.localStorage.getItem('pp_token');
       const storedUser = window.localStorage.getItem('pp_user');
-      
+
       if (storedToken && storedUser) {
         setToken(storedToken);
         setUser(JSON.parse(storedUser));
@@ -47,17 +48,17 @@ export function AuthProvider({ children }) {
       // Try API call first
       const res = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(API_KEY ? { 'x-api-key': API_KEY } : {}) },
         body: JSON.stringify({ email, password }),
       });
 
       if (res.ok) {
         const data = await res.json();
         const { token: newToken, user: userData } = data;
-        
+
         window.localStorage.setItem('pp_token', newToken);
         window.localStorage.setItem('pp_user', JSON.stringify(userData));
-        
+
         setToken(newToken);
         setUser(userData);
         return { success: true, user: userData };
@@ -81,7 +82,7 @@ export function AuthProvider({ children }) {
       // Try API call first
       const res = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(API_KEY ? { 'x-api-key': API_KEY } : {}) },
         body: JSON.stringify({ name, email, password }),
       });
 
@@ -142,4 +143,3 @@ export function useAuth() {
   }
   return context;
 }
-

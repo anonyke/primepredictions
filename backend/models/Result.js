@@ -27,7 +27,6 @@ const ResultSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-ResultSchema.index({ predictionId: 1 });
 ResultSchema.index({ status: 1 });
 ResultSchema.index({ createdAt: -1 });
 

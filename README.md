@@ -16,6 +16,16 @@ npm install
 npm run dev             # Starts on http://localhost:4000
 ```
 
+### Production (simple single-server)
+```bash
+# Install pm2 globally: npm i -g pm2
+# From repo root, build frontend and start processes with pm2:
+cd frontend && npm ci && npm run build && cd ..
+pm2 start ecosystem.config.js --env production
+pm2 save
+pm2 startup  # follow printed instructions to persist pm2 on reboot
+```
+
 ### Frontend Setup
 ```bash
 cd frontend
@@ -74,6 +84,8 @@ primepredictions/
 | Admin Settings | `/admin/settings` | Platform config |
 
 ## 🔌 API Endpoints
+
+> **Note:** All `/api/*` requests require the custom API key sent via the `x-api-key` header. The frontend automatically attaches this from `NEXT_PUBLIC_API_KEY`, validated against the backend's `API_KEY` env var.
 
 ### Authentication
 - `POST /api/auth/register` - Create account

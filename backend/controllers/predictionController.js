@@ -1,5 +1,6 @@
 import Prediction from '../models/Prediction.js';
 import User from '../models/User.js';
+import { sanitizeObject, sanitizeHtml } from '../utils/validators.js';
 
 export async function listPredictions(req, res) {
   try {
@@ -70,17 +71,23 @@ export async function createPrediction(req, res) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    // sanitize inputs
+    const safeMatchName = {
+      home: sanitizeHtml(String(matchName.home || '')),
+      away: sanitizeHtml(String(matchName.away || '')),
+    };
+
     const newPrediction = await Prediction.create({
-      matchName,
-      league,
-      category,
-      prediction,
-      odds,
-      confidence,
+      matchName: safeMatchName,
+      league: sanitizeHtml(String(league)),
+      category: sanitizeHtml(String(category)),
+      prediction: sanitizeHtml(String(prediction)),
+      odds: sanitizeHtml(String(odds)),
+      confidence: Number(confidence),
       kickoff: new Date(kickoff),
-      isPremium: isPremium || false,
-      isFeatured: isFeatured || false,
-      analysis,
+      isPremium: Boolean(isPremium),
+      isFeatured: Boolean(isFeatured),
+      analysis: sanitizeHtml(analysis || ''),
       createdBy: req.user.id,
     });
 
@@ -100,6 +107,15 @@ export async function updatePrediction(req, res) {
     delete updates.createdBy;
     delete updates.createdAt;
 
+    // sanitize updates
+    if (typeof updates.matchName === 'object') {
+      updates.matchName = sanitizeObject(updates.matchName);
+    }
+    if (updates.league) updates.league = sanitizeHtml(String(updates.league));
+    if (updates.category) updates.category = sanitizeHtml(String(updates.category));
+    if (updates.prediction) updates.prediction = sanitizeHtml(String(updates.prediction));
+    if (updates.odds) updates.odds = sanitizeHtml(String(updates.odds));
+    if (updates.analysis) updates.analysis = sanitizeHtml(String(updates.analysis));
     if (updates.kickoff) {
       updates.kickoff = new Date(updates.kickoff);
     }

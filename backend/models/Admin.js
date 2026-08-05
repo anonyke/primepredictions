@@ -24,7 +24,6 @@ const AdminSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-AdminSchema.index({ userId: 1 });
 AdminSchema.index({ role: 1 });
 
 export default mongoose.model('Admin', AdminSchema);

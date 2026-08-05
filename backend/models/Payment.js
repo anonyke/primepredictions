@@ -35,7 +35,6 @@ const PaymentSchema = new mongoose.Schema(
 
 PaymentSchema.index({ userId: 1 });
 PaymentSchema.index({ status: 1 });
-PaymentSchema.index({ reference: 1 });
 PaymentSchema.index({ provider: 1 });
 PaymentSchema.index({ createdAt: -1 });
 

@@ -3,6 +3,7 @@ import Prediction from '../models/Prediction.js';
 import Payment from '../models/Payment.js';
 import Notification from '../models/Notification.js';
 import Subscription from '../models/Subscription.js';
+import { sanitizeHtml, sanitizeObject } from '../utils/validators.js';
 
 export async function getMe(req, res) {
   try {
@@ -26,10 +27,10 @@ export async function updateProfile(req, res) {
     const { name, phone, avatar, preferences } = req.body;
     const updates = {};
 
-    if (name) updates.name = name;
-    if (phone !== undefined) updates.phone = phone;
-    if (avatar !== undefined) updates.avatar = avatar;
-    if (preferences) updates.preferences = preferences;
+    if (name) updates.name = sanitizeHtml(String(name));
+    if (phone !== undefined) updates.phone = sanitizeHtml(String(phone));
+    if (avatar !== undefined) updates.avatar = sanitizeHtml(String(avatar));
+    if (preferences) updates.preferences = sanitizeObject(preferences);
 
     const user = await User.findByIdAndUpdate(req.user.id, updates, {
       new: true,

@@ -1,6 +1,7 @@
 import Payment from '../models/Payment.js';
 import Subscription from '../models/Subscription.js';
 import User from '../models/User.js';
+import getStripe from '../services/stripe.js';
 
 export async function createPayment(req, res) {
   try {
@@ -11,6 +12,51 @@ export async function createPayment(req, res) {
     }
 
     const reference = `${provider.toUpperCase()}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // If using Stripe and provider === 'stripe', create a Checkout session
+    if (provider === 'stripe') {
+      const stripe = getStripe();
+      if (!stripe) {
+        return res.status(500).json({ error: 'Stripe not configured on server' });
+      }
+
+      // Create a payment record in pending state
+      const payment = await Payment.create({
+        userId: req.user.id,
+        provider,
+        amount,
+        currency,
+        reference,
+        phoneNumber,
+        email,
+        description,
+        metadata,
+        status: 'pending',
+      });
+
+      const successUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/payments/success?reference=${reference}`;
+      const cancelUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/payments/cancel`;
+
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'payment',
+        line_items: [
+          {
+            price_data: {
+              currency: currency.toLowerCase(),
+              product_data: { name: description || `Purchase - ${reference}` },
+              unit_amount: Math.round(amount * 100),
+            },
+            quantity: 1,
+          },
+        ],
+        metadata: { paymentReference: reference, userId: String(req.user.id) },
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+      });
+
+      return res.status(201).json({ payment, checkoutUrl: session.url });
+    }
 
     const payment = await Payment.create({
       userId: req.user.id,
@@ -163,6 +209,76 @@ export async function handleWebhook(req, res) {
   } catch (err) {
     console.error('Webhook error:', err);
     res.status(500).json({ error: 'Webhook processing failed' });
+  }
+}
+
+// Stripe requires raw body verification. A dedicated route will call this handler with the raw body available.
+export async function handleStripeWebhookRaw(req, res) {
+  const stripe = getStripe();
+  const sig = req.headers['stripe-signature'];
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!stripe || !webhookSecret) {
+    console.error('Stripe webhook received but Stripe not configured');
+    return res.status(400).send('Stripe not configured');
+  }
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+  } catch (err) {
+    console.error('Stripe webhook signature verification failed:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  try {
+    // Handle the event
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object;
+      const reference = session.metadata?.paymentReference;
+
+      if (reference) {
+        const payment = await Payment.findOne({ reference });
+        if (payment && payment.status === 'pending') {
+          payment.status = 'completed';
+          payment.processedAt = new Date();
+          payment.transactionId = session.payment_intent || session.payment_intent_id || session.id;
+          payment.webhookReceived = true;
+          payment.webhookData = session;
+          await payment.save();
+
+          // Create or update subscription similar to processPayment
+          const plan = payment.metadata?.plan || 'monthly';
+          const durationMap = { weekly: 7, monthly: 30, yearly: 365 };
+          const days = durationMap[plan] || 30;
+
+          let subscription = await Subscription.findOne({ userId: payment.userId, status: 'active' });
+          if (subscription) {
+            subscription.expiresAt = new Date(subscription.expiresAt.getTime() + days * 86400000);
+            subscription.paymentReference = payment.reference;
+            await subscription.save();
+          } else {
+            subscription = await Subscription.create({
+              userId: payment.userId,
+              plan,
+              status: 'active',
+              price: payment.amount,
+              currency: payment.currency,
+              expiresAt: new Date(Date.now() + days * 86400000),
+              paymentReference: payment.reference,
+              paymentMethod: payment.provider,
+            });
+
+            await User.findByIdAndUpdate(payment.userId, { subscriptionId: subscription._id });
+          }
+        }
+      }
+    }
+
+    res.json({ received: true });
+  } catch (err) {
+    console.error('Stripe webhook handling error:', err);
+    res.status(500).send('Webhook handling error');
   }
 }
 

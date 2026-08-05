@@ -102,20 +102,36 @@ export function sanitizeHtml(input) {
   if (typeof input !== 'string') return input;
   return input
     .replace(/&/g, '&amp;')
-    .replace(/</g, '<')
-    .replace(/>/g, '>')
-    .replace(/"/g, '"')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;');
 }
 
 export function sanitizeObject(obj) {
+  // Handle primitive strings
+  if (typeof obj === 'string') return sanitizeHtml(obj);
+
+  // Handle arrays
+  if (Array.isArray(obj)) {
+    return obj.map((item) => {
+      if (typeof item === 'string') return sanitizeHtml(item);
+      if (item && typeof item === 'object') return sanitizeObject(item);
+      return item;
+    });
+  }
+
   if (!obj || typeof obj !== 'object') return obj;
   const sanitized = {};
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === 'string') {
       sanitized[key] = sanitizeHtml(value);
     } else if (Array.isArray(value)) {
-      sanitized[key] = value.map(item => sanitizeObject(item));
+      sanitized[key] = value.map((item) => {
+        if (typeof item === 'string') return sanitizeHtml(item);
+        if (item && typeof item === 'object') return sanitizeObject(item);
+        return item;
+      });
     } else if (value && typeof value === 'object') {
       sanitized[key] = sanitizeObject(value);
     } else {
@@ -123,5 +139,10 @@ export function sanitizeObject(obj) {
     }
   }
   return sanitized;
+}
+
+export function escapeRegex(str) {
+  if (typeof str !== 'string') return str;
+  return str.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 

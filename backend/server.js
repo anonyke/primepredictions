@@ -3,14 +3,17 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
+import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import { connectDB } from './config/database.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import predictionRoutes from './routes/predictionRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
+import { handleStripeWebhookRaw } from './controllers/paymentController.js';
 import adminRoutes from './routes/adminRoutes.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
+import { requireApiKey } from './middleware/apiKey.js';
 
 dotenv.config();
 
@@ -27,7 +30,7 @@ app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
 }));
 
 // Rate limiting
@@ -50,6 +53,11 @@ const authLimiter = rateLimit({
 
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
+
+// Stripe webhook needs raw body for signature verification
+app.post('/api/payments/webhook/stripe', bodyParser.raw({ type: 'application/json' }), (req, res) => {
+  return handleStripeWebhookRaw(req, res);
+});
 
 // Body parsing
 app.use(express.json({ limit: '10kb' }));
@@ -77,6 +85,8 @@ app.get('/', (req, res) => {
 });
 
 // API Routes
+// Require valid API key for all API requests
+app.use('/api', requireApiKey);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/predictions', predictionRoutes);

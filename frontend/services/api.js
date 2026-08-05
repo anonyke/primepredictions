@@ -1,4 +1,7 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+// Support both NEXT_PUBLIC_API_URL and NEXT_PUBLIC_API_BASE_URL for compatibility
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+// Custom API key sent to the backend on every request
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
 
 class ApiError extends Error {
   constructor(status, message, details = null) {
@@ -31,6 +34,7 @@ export async function apiFetch(path, { method = 'GET', body, token, headers: ext
   const authToken = token || getToken();
   const headers = {
     'Content-Type': 'application/json',
+    ...(API_KEY ? { 'x-api-key': API_KEY } : {}),
     ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
     ...extraHeaders,
   };
