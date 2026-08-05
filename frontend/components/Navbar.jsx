@@ -16,6 +16,7 @@ export default function Navbar() {
   const { user, logout, isAdmin } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [theme, setTheme] = useState('dark');
   const pathname = usePathname();
 
   useEffect(() => {
@@ -23,6 +24,20 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Theme toggle
+  useEffect(() => {
+    const saved = window.localStorage.getItem('pp_theme') || 'dark';
+    setTheme(saved);
+    document.documentElement.setAttribute('data-theme', saved);
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    window.localStorage.setItem('pp_theme', next);
+    document.documentElement.setAttribute('data-theme', next);
+  };
 
   const isActive = (href) => pathname === href;
 
@@ -64,8 +79,16 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Auth Buttons */}
+{/* Auth Buttons */}
         <div className="hidden md:flex items-center gap-3">
+          <button
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            className="text-gray-300 hover:text-cyan-300 bg-transparent border-none text-lg cursor-pointer transition-colors"
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? '🌙' : '☀️'}
+          </button>
           {user ? (
             <div className="flex items-center gap-3">
               <a
@@ -114,9 +137,16 @@ export default function Navbar() {
         </button>
       </nav>
 
-      {/* Mobile Menu */}
+{/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden bg-[#0A0E27]/95 backdrop-blur-xl border-t border-white/5 px-6 py-4 flex flex-col gap-1">
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-2 py-2.5 text-sm font-medium text-gray-300 hover:text-cyan-300 bg-transparent border-b border-white/5 text-left cursor-pointer"
+          >
+            <span className="text-lg">{theme === 'dark' ? '🌙' : '☀️'}</span>
+            {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+          </button>
           {navLinks.map((link) => (
             <a
               key={link.href}

@@ -239,24 +239,37 @@ export default function PricingPage() {
           ))}
         </div>
 
-        {/* Payment Section */}
+{/* Checkout Modal */}
         {showPayment && selectedPlan && (
-          <div style={{ marginTop: 24 }}>
-            <div style={{ textAlign: 'center', marginBottom: 32 }}>
-              <h2 style={{
-                fontFamily: '"Plus Jakarta Sans", sans-serif',
-                fontSize: 24,
-                fontWeight: 800,
-                color: '#fff',
-                marginBottom: 8,
-              }}>
-                Complete Your Purchase
-              </h2>
-              <p style={{ color: '#6B7394' }}>
-                You selected the <strong style={{ color: '#00E5FF' }}>{selectedPlan.name}</strong> plan - KES {selectedPlan.price}/{selectedPlan.period}
-              </p>
+          <div
+            className="modal-overlay"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowPayment(false);
+            }}
+          >
+            <div className="modal" style={{ maxWidth: 560, width: '92%', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+              <button
+                onClick={() => setShowPayment(false)}
+                aria-label="Close"
+                style={{
+                  position: 'absolute',
+                  top: 14,
+                  right: 14,
+                  width: 34,
+                  height: 34,
+                  borderRadius: '50%',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: '#B0B8D1',
+                  fontSize: 16,
+                  cursor: 'pointer',
+                  zIndex: 10,
+                }}
+              >
+                ✕
+              </button>
+              <PaymentForm />
             </div>
-            <PaymentForm />
           </div>
         )}
 

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import DashboardCards from '../../components/DashboardCards';
+import { useAuth } from '../../context/AuthContext';
 
 const monthlyData = [
   { month: 'Aug', won: 42, lost: 8 },
@@ -31,6 +32,8 @@ const quickLinks = [
 
 export default function DashboardPage() {
   const [activeChart, setActiveChart] = useState('winRate');
+  const { user } = useAuth();
+  const firstName = user?.name?.split(' ')[0] || 'there';
 
   const maxVal = Math.max(...monthlyData.map(d => d.won));
 
@@ -41,11 +44,11 @@ export default function DashboardPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
           <div>
             <h1 style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontSize: 28, fontWeight: 800, marginBottom: 4 }}>
-              Welcome back, <span style={{
+Welcome back, <span style={{
                 background: 'linear-gradient(135deg, #00E5FF, #7C4DFF)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-              }}>John</span>
+              }}>{firstName}</span>
             </h1>
             <p style={{ color: '#6B7394' }}>Here&apos;s your performance overview</p>
           </div>

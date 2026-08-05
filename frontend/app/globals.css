@@ -5,6 +5,67 @@
 @tailwind utilities;
 
 /* ============================================================
+   LIGHT THEME OVERRIDES
+   ============================================================ */
+html[data-theme="light"] {
+  --bg-primary: #F4F6FB;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #E8ECF7;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #EDF1FA;
+
+  --text-primary: #0F1535;
+  --text-secondary: #3A4266;
+  --text-tertiary: #6B7394;
+  --text-muted: #9AA3C0;
+
+  --primary: #00B8CC;
+  --primary-light: #00A9BC;
+  --primary-dark: #0096A8;
+
+  --secondary: #6C43E0;
+  --secondary-light: #8B66F0;
+
+  --border-subtle: rgba(10, 14, 39, 0.08);
+  --border-primary: rgba(0, 184, 204, 0.35);
+  --border-secondary: rgba(108, 67, 224, 0.35);
+
+  --shadow-card: 0 8px 32px rgba(15, 21, 53, 0.12);
+  --shadow-glow: 0 0 24px rgba(0, 184, 204, 0.18);
+  --shadow-glow-secondary: 0 0 24px rgba(108, 67, 224, 0.2);
+
+  --gradient-bg: radial-gradient(1200px 800px at 80% -10%, rgba(108, 67, 224, 0.08), transparent 60%),
+                 radial-gradient(1000px 600px at -10% 10%, rgba(0, 184, 204, 0.08), transparent 50%),
+                 #F4F6FB;
+}
+
+html[data-theme="light"] body {
+  background: var(--gradient-bg);
+  color: var(--text-primary);
+}
+
+html[data-theme="light"] h1,
+html[data-theme="light"] h2,
+html[data-theme="light"] h3,
+html[data-theme="light"] h4 {
+  color: var(--text-primary);
+}
+
+html[data-theme="light"] .glass {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(10, 14, 39, 0.08);
+}
+
+html[data-theme="light"] .card {
+  background: var(--bg-card);
+  border-color: rgba(10, 14, 39, 0.08);
+}
+
+html[data-theme="light"] .card:hover {
+  border-color: var(--border-primary);
+}
+
+/* ============================================================
    DESIGN TOKENS
    ============================================================ */
 :root {

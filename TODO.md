@@ -1,13 +1,31 @@
-# TODO: Custom API Key Authentication
+# Website Advancement - TODO
 
-- [x] 1. Create `backend/middleware/apiKey.js` - middleware that validates `x-api-key` header
-- [x] 2. Edit `backend/server.js` - apply apiKey middleware to all `/api` routes
-- [x] 3. Edit `backend/.env` - add `API_KEY`
-- [x] 4. Edit `backend/.env.example` - add `API_KEY` placeholder
-- [x] 5. Edit `frontend/.env.local` - add `NEXT_PUBLIC_API_KEY`
-- [x] 6. Edit `frontend/.env.example` - add `NEXT_PUBLIC_API_KEY` placeholder
-- [x] 7. Edit `frontend/services/api.js` - attach `x-api-key` header on all requests
-- [x] 8. Edit `frontend/context/AuthContext.jsx` - attach header on login/register fetch
-- [x] 9. Update `README.md` - document the new API_KEY env var
+## 1. Homepage Hero (`frontend/app/page.jsx`)
+- [x] Change headline to "Smarter Football Predictions"
+- [x] Keep Primary CTA "Get Premium Access" + Secondary "View Free Predictions"
+- [x] Add subtle sports pattern background to hero (kept gradient orbs)
 
-## ✅ All steps complete
+## 2. Replace Testimonials with Data Visualization (`frontend/app/page.jsx`)
+- [x] Remove the 3 testimonial cards
+- [x] Add "Performance Dashboard" section with:
+  - Animated win-rate gauge
+  - Confidence bars per category
+  - Monthly win/loss bar chart
+  - Category breakdown strip with icons
+
+## 3. Payment Flow Grooming
+- [x] Convert PaymentForm into a checkout modal (logos only appear in modal)
+- [x] Payment logos only inside the checkout modal
+
+## 4. Navbar Mobile-First (`frontend/components/Navbar.jsx`)
+- [x] Added theme toggle (desktop + mobile)
+- [x] Ensure collapsible hamburger menu works well
+
+## 5. Dark Mode Toggle (lighter variant)
+- [x] Add theme toggle button in Navbar
+- [x] Persist theme in localStorage
+- [x] Add light-theme CSS variable overrides in globals.css
+
+## 6. Dashboard Polish (`frontend/app/dashboard/page.jsx`)
+- [x] Pull real user name from AuthContext (replace hardcoded "John")
+- [x] Ensure responsive grid for mobile (already present)

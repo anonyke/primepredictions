@@ -142,9 +142,9 @@ export default function HomePage() {
             🇰🇪 Kenya&apos;s Most Trusted Prediction Platform
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6 animate-fadeInUp delay-100" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-            Win Smarter with
-            <span className="block text-gradient">Data-Driven Predictions</span>
+<h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6 animate-fadeInUp delay-100" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+            Smarter
+            <span className="block text-gradient">Football Predictions</span>
           </h1>
 
           <p className="max-w-2xl mx-auto text-base sm:text-lg text-[#B0B8D1] mb-8 animate-fadeInUp delay-200">
@@ -320,36 +320,104 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============ TESTIMONIALS ============ */}
+{/* ============ PERFORMANCE DASHBOARD (DATA VIZ) ============ */}
       <section className="py-20" style={{ background: 'linear-gradient(180deg, transparent, rgba(19,24,73,0.4))' }}>
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-12 scroll-reveal">
             <h2 className="text-3xl font-extrabold mb-3">
-              What Our <span className="text-gradient">Members Say</span>
+              Proven <span className="text-gradient">Performance</span>
             </h2>
             <p className="text-[#B0B8D1] max-w-xl mx-auto">
-              Real results from real members across Kenya.
+              Real results tracked transparently across every category. No hype — just data.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {testimonials.map((t, i) => (
-              <div key={t.name} className={`card scroll-reveal delay-${(i % 3) * 100}`}>
-                <div className="flex items-center gap-2 text-yellow-400 text-sm mb-4">
-                  {'★★★★★'}
-                </div>
-                <p className="text-sm text-[#B0B8D1] leading-relaxed mb-5">"{t.quote}"</p>
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold"
-                    style={{ background: 'linear-gradient(135deg, #00E5FF, #7C4DFF)', color: '#0A0E27' }}
-                  >
-                    {t.initials}
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            {/* Win Rate Gauge */}
+            <div className="card scroll-reveal flex flex-col items-center justify-center text-center">
+              <div className="text-xs uppercase tracking-wider text-[#6B7394] mb-3">Overall Win Rate</div>
+              <div
+                className="relative w-40 h-40 rounded-full mb-4"
+                style={{
+                  background: 'conic-gradient(#00E676 0% 87%, rgba(255,255,255,0.06) 87% 100%)',
+                  WebkitMask: 'radial-gradient(farthest-side, transparent 62%, #000 63%)',
+                  mask: 'radial-gradient(farthest-side, transparent 62%, #000 63%)',
+                }}
+              />
+              <div className="absolute text-5xl font-extrabold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+                87%
+              </div>
+              <div className="text-sm text-[#B0B8D1] mt-6">
+                <span className="text-[#00E676] font-bold">+2.4%</span> vs last month
+              </div>
+            </div>
+
+            {/* Confidence Bars */}
+            <div className="card scroll-reveal">
+              <h3 className="text-lg font-bold text-white mb-5">Confidence by Category</h3>
+              {[
+                { label: '1X2', pct: 91, color: '#00E5FF' },
+                { label: 'Over/Under', pct: 86, color: '#7C4DFF' },
+                { label: 'Correct Score', pct: 74, color: '#00E676' },
+                { label: 'HT/FT', pct: 68, color: '#FFD700' },
+                { label: 'Double Chance', pct: 88, color: '#FF6B35' },
+              ].map((c) => (
+                <div key={c.label} className="mb-4 last:mb-0">
+                  <div className="flex items-center justify-between text-sm mb-1.5">
+                    <span className="text-[#B0B8D1]">{c.label}</span>
+                    <span className="text-white font-semibold">{c.pct}%</span>
                   </div>
-                  <div>
-                    <div className="text-sm font-bold text-white">{t.name}</div>
-                    <div className="text-xs text-[#6B7394]">{t.role}</div>
+                  <div className="confidence-bar">
+                    <div
+                      className="confidence-fill"
+                      style={{ width: `${c.pct}%`, background: c.color }}
+                    />
                   </div>
                 </div>
+              ))}
+            </div>
+
+            {/* Monthly Bar Chart */}
+            <div className="card scroll-reveal">
+              <h3 className="text-lg font-bold text-white mb-5">Monthly Results</h3>
+              <div className="flex items-end justify-between gap-2 h-36">
+                {[
+                  { m: 'N', val: 42 }, { m: 'D', val: 38 }, { m: 'J', val: 45 },
+                  { m: 'F', val: 40 }, { m: 'M', val: 48 }, { m: 'A', val: 44 },
+                ].map((d, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
+                    <span className="text-[10px] font-semibold text-[#6B7394]">{d.val}</span>
+                    <div
+                      className="w-full rounded-t"
+                      style={{
+                        height: `${(d.val / 48) * 120}px`,
+                        background: 'linear-gradient(180deg, #00E5FF, #7C4DFF)',
+                        opacity: 0.85,
+                      }}
+                    />
+                    <span className="text-[10px] text-[#6B7394]">{d.m}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-center gap-4 mt-4 text-xs text-[#6B7394]">
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: '#00E5FF' }} /> Won</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm inline-block text-[#FF5252]" style={{ background: '#FF5252' }} /> Lost</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Category breakdown strip */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5 scroll-reveal">
+            {[
+              { icon: '⚽', label: '1X2', stat: '91%' },
+              { icon: '📈', label: 'Over/Under', stat: '86%' },
+              { icon: '🎯', label: 'Correct Score', stat: '74%' },
+              { icon: '🔀', label: 'HT/FT', stat: '68%' },
+            ].map((c) => (
+              <div key={c.label} className="glass rounded-2xl p-4 text-center">
+                <div className="text-2xl mb-1">{c.icon}</div>
+                <div className="text-xl font-extrabold text-white">{c.stat}</div>
+                <div className="text-xs text-[#6B7394]">{c.label}</div>
               </div>
             ))}
           </div>
