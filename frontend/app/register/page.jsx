@@ -37,12 +37,44 @@ export default function RegisterPage() {
       return;
     }
 
-    setLoading(true);
-    // Simulate registration
-    setTimeout(() => {
+setLoading(true);
+    try {
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL ||
+        process.env.NEXT_PUBLIC_API_BASE_URL ||
+        (typeof window !== 'undefined' && window.location.hostname === 'localhost'
+          ? 'http://localhost:4000'
+          : '');
+      const apiKey = process.env.NEXT_PUBLIC_API_KEY || '';
+
+      const response = await fetch(`${apiUrl.replace(/\/$/, '')}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(apiKey ? { 'x-api-key': apiKey } : {}),
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.ok) {
+        // Store the token and user if returned so the user is logged in.
+        if (data.token && data.user) {
+          window.localStorage.setItem('pp_token', data.token);
+          window.localStorage.setItem('pp_user', JSON.stringify(data.user));
+        }
+        setLoading(false);
+        window.location.href = '/login?registered=1';
+        return;
+      }
+
+      setError(data.error || 'Registration failed. Please try again.');
       setLoading(false);
-      window.location.href = '/login';
-    }, 1500);
+    } catch (err) {
+      setError('Unable to reach the server. Please check your connection and try again.');
+      setLoading(false);
+    }
   };
 
   return (

@@ -2,8 +2,23 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+// Production API base URL - standardized on NEXT_PUBLIC_API_URL.
+// localhost fallback is only used for local development.
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  (typeof window !== 'undefined' && window.location.hostname === 'localhost'
+    ? 'http://localhost:4000'
+    : '');
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
+
+// Single source of truth for the API base used by the auth context.
+function resolveApiUrl() {
+  if (API_URL) return API_URL.replace(/\/$/, '');
+  throw new Error(
+    'API base URL is not configured. Set NEXT_PUBLIC_API_URL in Vercel to your deployed backend URL.'
+  );
+}
 
 const AuthContext = createContext({
   user: null,
@@ -46,7 +61,7 @@ export function AuthProvider({ children }) {
 
     try {
       // Try API call first
-      const res = await fetch(`${API_URL}/api/auth/login`, {
+      const res = await fetch(`${resolveApiUrl()}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...(API_KEY ? { 'x-api-key': API_KEY } : {}) },
         body: JSON.stringify({ email, password }),
@@ -80,7 +95,7 @@ export function AuthProvider({ children }) {
 
     try {
       // Try API call first
-      const res = await fetch(`${API_URL}/api/auth/register`, {
+      const res = await fetch(`${resolveApiUrl()}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...(API_KEY ? { 'x-api-key': API_KEY } : {}) },
         body: JSON.stringify({ name, email, password }),

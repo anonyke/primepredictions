@@ -5,17 +5,28 @@ import { useAuth } from '../context/AuthContext';
 import { usePathname } from 'next/navigation';
 
 const navLinks = [
-  { href: '/', label: 'Home' },
+  { href: '/', label: 'Dashboard' },
   { href: '/predictions', label: 'Free Predictions' },
-  { href: '/premium', label: 'Premium' },
+  { href: '/premium', label: 'Premium Predictions' },
   { href: '/results', label: 'Results' },
-  { href: '/pricing', label: 'Pricing' },
+  { href: '/pricing', label: 'Statistics' },
+  { href: '/pricing', label: 'Subscription' },
+];
+
+const userMenuLinks = [
+  { href: '/dashboard', label: 'Dashboard', icon: '📊' },
+  { href: '/dashboard/wallet', label: 'Wallet', icon: '👛' },
+  { href: '/dashboard/subscription', label: 'My Subscription', icon: '👑' },
+  { href: '/dashboard/notifications', label: 'Notifications', icon: '🔔' },
+  { href: '/dashboard/profile', label: 'Profile', icon: '👤' },
+  { href: '/support', label: 'Support', icon: '🎧' },
 ];
 
 export default function Navbar() {
   const { user, logout, isAdmin } = useAuth();
-  const [scrolled, setScrolled] = useState(false);
+const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [theme, setTheme] = useState('dark');
   const pathname = usePathname();
 
@@ -38,6 +49,10 @@ export default function Navbar() {
     window.localStorage.setItem('pp_theme', next);
     document.documentElement.setAttribute('data-theme', next);
   };
+
+  // Hide the public navbar on the dedicated /admin layout
+  const isAdminRoute = pathname === '/admin' || pathname.startsWith('/admin/');
+  if (isAdminRoute) return null;
 
   const isActive = (href) => pathname === href;
 
@@ -89,25 +104,58 @@ export default function Navbar() {
           >
             {theme === 'dark' ? '🌙' : '☀️'}
           </button>
-          {user ? (
-            <div className="flex items-center gap-3">
-              <a
-                href="/dashboard"
-                className={`flex items-center gap-2 text-sm font-medium no-underline transition-colors ${
-                  pathname.startsWith('/dashboard') ? 'text-cyan-400' : 'text-gray-300 hover:text-cyan-300'
-                }`}
+{user ? (
+            <div className="relative flex items-center gap-3">
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center gap-2 text-sm font-medium no-underline transition-colors hover:text-cyan-300 cursor-pointer bg-transparent border-none"
               >
                 <span className="flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-cyan-400 to-violet-500 text-black text-xs font-bold">
                   {user.name?.charAt(0)?.toUpperCase() || 'U'}
                 </span>
-                Dashboard
-              </a>
-              <button
-                onClick={logout}
-                className="border border-cyan-400/60 text-cyan-400 px-4 py-1.5 rounded-lg text-sm bg-transparent cursor-pointer hover:bg-cyan-400 hover:text-black transition-all no-underline"
-              >
-                Logout
+                <span className="text-gray-300">{user.name?.split(' ')[0] || 'Account'}</span>
+                <span className="text-xs text-gray-400">{userMenuOpen ? '▲' : '▼'}</span>
               </button>
+              {userMenuOpen && (
+                <div className="absolute top-full right-0 mt-2 w-56 rounded-xl bg-[#0F1535] border border-white/10 shadow-2xl overflow-hidden animate-fadeInDown z-50">
+                  <div className="px-4 py-3 border-b border-white/5">
+                    <div className="text-sm font-semibold text-white">{user.name}</div>
+                    <div className="text-xs text-gray-400 truncate">{user.email}</div>
+                  </div>
+                  <div className="py-1">
+                    {userMenuLinks.map((link) => (
+                      <a
+                        key={link.label}
+                        href={link.href}
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-cyan-300 hover:bg-white/5 no-underline transition-colors"
+                      >
+                        <span className="text-base">{link.icon}</span>
+                        {link.label}
+                      </a>
+                    ))}
+                    {isAdmin && (
+                      <a
+                        href="/admin"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-cyan-300 hover:bg-white/5 no-underline transition-colors"
+                      >
+                        <span className="text-base">🛠️</span>
+                        Admin Panel
+                      </a>
+                    )}
+                  </div>
+                  <div className="border-t border-white/5 p-1">
+                    <button
+                      onClick={() => { logout(); setUserMenuOpen(false); }}
+                      className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 rounded-lg cursor-pointer bg-transparent border-none"
+                    >
+                      <span className="text-base">🚪</span>
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <>

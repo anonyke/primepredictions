@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { paymentsApi } from '../services/api';
 
 const paymentProviders = [
   {
@@ -51,9 +52,9 @@ const plans = [
   { name: 'Yearly', price: '9,999', period: 'year', popular: false },
 ];
 
-export default function PaymentForm({ onSuccess, onError }) {
-  const [step, setStep] = useState('plan'); // plan, provider, details, processing, success
-  const [selectedPlan, setSelectedPlan] = useState(null);
+export default function PaymentForm({ onSuccess, onError, selectedPlan: initialPlan }) {
+  const [step, setStep] = useState(initialPlan ? 'provider' : 'plan'); // plan, provider, details, processing, success
+  const [selectedPlan, setSelectedPlan] = useState(initialPlan ? { name: initialPlan.name, price: initialPlan.price, period: initialPlan.period, popular: initialPlan.popular } : null);
   const [selectedProvider, setSelectedProvider] = useState(null);
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -71,7 +72,7 @@ export default function PaymentForm({ onSuccess, onError }) {
     setError('');
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -80,13 +81,42 @@ export default function PaymentForm({ onSuccess, onError }) {
       return;
     }
 
+    if (selectedProvider.id === 'pesapal' && !email) {
+      setError('Please enter your email address for PesaPal');
+      return;
+    }
+
     setStep('processing');
 
-    // Simulate payment processing
-    setTimeout(() => {
-      setStep('success');
-      if (onSuccess) onSuccess();
-    }, 2000);
+    try {
+      const amount = parseFloat(selectedPlan.price.replace(/,/g, ''));
+      const res = await paymentsApi.create({
+        provider: selectedProvider.id,
+        amount,
+        currency: 'KES',
+        phoneNumber: phone ? `254${phone}` : undefined,
+        email,
+        description: `${selectedPlan.name} Premium Subscription`,
+        metadata: { plan: selectedPlan.name.toLowerCase() },
+      });
+
+      // For hosted checkouts (PesaPal, Stripe), redirect to the checkout URL.
+      if (res.checkoutUrl) {
+        window.location.href = res.checkoutUrl;
+        return;
+      }
+
+      // Otherwise simulate/complete locally.
+      setTimeout(() => {
+        setStep('success');
+        if (onSuccess) onSuccess();
+      }, 500);
+    } catch (err) {
+      console.error('Payment creation error:', err);
+      setError(err.message || 'Payment failed. Please try again.');
+      setStep('details');
+      if (onError) onError(err);
+    }
   };
 
   const handleBack = () => {

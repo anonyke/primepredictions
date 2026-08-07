@@ -1,31 +1,13 @@
-# Website Advancement - TODO
+# Professional Frontend Redesign — Task List
 
-## 1. Homepage Hero (`frontend/app/page.jsx`)
-- [x] Change headline to "Smarter Football Predictions"
-- [x] Keep Primary CTA "Get Premium Access" + Secondary "View Free Predictions"
-- [x] Add subtle sports pattern background to hero (kept gradient orbs)
-
-## 2. Replace Testimonials with Data Visualization (`frontend/app/page.jsx`)
-- [x] Remove the 3 testimonial cards
-- [x] Add "Performance Dashboard" section with:
-  - Animated win-rate gauge
-  - Confidence bars per category
-  - Monthly win/loss bar chart
-  - Category breakdown strip with icons
-
-## 3. Payment Flow Grooming
-- [x] Convert PaymentForm into a checkout modal (logos only appear in modal)
-- [x] Payment logos only inside the checkout modal
-
-## 4. Navbar Mobile-First (`frontend/components/Navbar.jsx`)
-- [x] Added theme toggle (desktop + mobile)
-- [x] Ensure collapsible hamburger menu works well
-
-## 5. Dark Mode Toggle (lighter variant)
-- [x] Add theme toggle button in Navbar
-- [x] Persist theme in localStorage
-- [x] Add light-theme CSS variable overrides in globals.css
-
-## 6. Dashboard Polish (`frontend/app/dashboard/page.jsx`)
-- [x] Pull real user name from AuthContext (replace hardcoded "John")
-- [x] Ensure responsive grid for mobile (already present)
+## Steps
+- [ ] 1. Create shared `PageHeader` component (eyebrow + gradient title + subtitle + container)
+- [ ] 2. Create `AdminLayout` component (professional sidebar + topbar for admin area)
+- [ ] 3. Update `Navbar` to hide on `/admin` routes, polish active states, theme toggle, mobile menu
+- [ ] 4. Polish `Footer` (theming via CSS variables, accessibility)
+- [ ] 5. Fix duplicate Navbar/Footer — remove per-page imports from public & dashboard pages
+- [ ] 6. Refactor admin pages to use `AdminLayout` (dashboard, predictions, users, payments, settings)
+- [ ] 7. Standardize colors/backgrounds to CSS variables across shared components (PredictionCard, MatchCard, DashboardCards, PaymentForm)
+- [ ] 8. Refactor public pages to use `PageHeader` + standardized containers (Home, Predictions, Premium, Results, Pricing, Login, Register, Forgot Password)
+- [ ] 9. Responsive & accessibility polish (focus states, semantic markup, consistent spacing)
+- [ ] 10. Build + verify no errors

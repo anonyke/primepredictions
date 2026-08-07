@@ -118,6 +118,34 @@ primepredictions/
 - Stripe
 - Coinbase (Crypto)
 
+## 🏦 PesaPal Integration
+
+PesaPal is integrated as a hosted checkout provider. When a user selects **PesaPal** in the payment form, the backend:
+
+1. Obtains a PesaPal OAuth 1.0a access token (HMAC-SHA1 signed).
+2. Submits an order to PesaPal's `SubmitOrderRequest` API.
+3. Returns a hosted `redirect_url` to the frontend, which redirects the user to PesaPal to complete payment.
+4. Verifies the transaction via the PesaPal IPN webhook and/or a status-check endpoint, then activates the subscription.
+
+### Environment Variables (backend/.env)
+```
+PESAPAL_CONSUMER_KEY=<your_pesapal_consumer_key>
+PESAPAL_CONSUMER_SECRET=<your_pesapal_consumer_secret>
+PESAPAL_ENV=live            # or "sandbox"
+PESAPAL_CALLBACK_URL=http://localhost:3000/payments/pesapal/callback
+PESAPAL_IPN_URL=http://localhost:4000/api/payments/pesapal/ipn
+PESAPAL_IPN_SECRET=<optional shared secret for IPN signature verification>
+```
+> ⚠️ **Never commit these credentials.** They live in the gitignored `backend/.env`.
+
+### Endpoints
+- `POST /api/payments` with `{ provider: 'pesapal', amount, email, ... }` → returns `{ checkoutUrl, reference, orderTrackingId }`.
+- `POST /api/payments/pesapal/ipn` — PesaPal IPN webhook (raw body, signature-verified).
+- `GET /api/payments/pesapal/status/:reference` — frontend status check after callback redirect.
+
+### Webhook / IPN Setup
+In your PesaPal dashboard, register the **IPN URL** as `https://<your-backend>/api/payments/pesapal/ipn`. Configure the PesaPal callback URL to point to your frontend `/payments/pesapal/callback` page.
+
 ## 🎨 Design Features
 - Dark professional sports analytics theme
 - Premium gradients & glassmorphism

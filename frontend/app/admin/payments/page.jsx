@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Navbar from '../../../components/Navbar';
-import Footer from '../../../components/Footer';
+import AdminLayout from '../../../components/AdminLayout';
 import { useAuth } from '../../../context/AuthContext';
 
 const payments = [
@@ -16,6 +15,8 @@ const payments = [
 
 export default function AdminPaymentsPage() {
   const { user, isAdmin, loading: authLoading } = useAuth();
+  const [filter, setFilter] = useState('all');
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
@@ -25,21 +26,14 @@ export default function AdminPaymentsPage() {
 
   if (authLoading || !user || !isAdmin) {
     return (
-      <div>
-        <Navbar />
-        <main style={{ padding: '100px 20px 60px', maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ padding: 60 }}>
-            <div style={{ width: 48, height: 48, borderRadius: '50%', border: '3px solid rgba(0,229,255,0.2)', borderTopColor: '#00E5FF', margin: '0 auto 20px', animation: 'spin 1s linear infinite' }} />
-            <p style={{ color: '#6B7394' }}>Verifying access...</p>
-          </div>
-        </main>
-        <Footer />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ width: 48, height: 48, borderRadius: '50%', border: '3px solid rgba(0,229,255,0.2)', borderTopColor: '#00E5FF', margin: '0 auto 20px', animation: 'spin 1s linear infinite' }} />
+          <p style={{ color: '#6B7394' }}>Verifying access...</p>
+        </div>
       </div>
     );
   }
-
-  const [filter, setFilter] = useState('all');
-  const [search, setSearch] = useState('');
 
   const filtered = payments.filter(p => {
     const matchStatus = filter === 'all' || p.status === filter;
@@ -58,103 +52,88 @@ export default function AdminPaymentsPage() {
     return styles[status] || styles.pending;
   };
 
+  const summaryCards = [
+    { label: 'Total Revenue', value: `KES ${totalRevenue.toLocaleString()}`, color: '#00E5FF', bg: 'rgba(0,229,255,0.06)', border: 'rgba(0,229,255,0.15)' },
+    { label: 'Completed', value: payments.filter(p => p.status === 'completed').length, color: '#00E676', bg: 'rgba(0,230,118,0.06)', border: 'rgba(0,230,118,0.15)' },
+    { label: 'Pending', value: payments.filter(p => p.status === 'pending').length, color: '#FF9100', bg: 'rgba(255,145,0,0.06)', border: 'rgba(255,145,0,0.15)' },
+    { label: 'Failed', value: payments.filter(p => p.status === 'failed').length, color: '#FF5252', bg: 'rgba(255,82,82,0.06)', border: 'rgba(255,82,82,0.15)' },
+  ];
+
   return (
-    <div>
-      <Navbar />
-      <main style={{ padding: '100px 20px 60px', maxWidth: 1200, margin: '0 auto' }}>
-        <div style={{ marginBottom: 32 }}>
-          <h1 style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontSize: 28, fontWeight: 800, marginBottom: 4 }}>
-            💳 Payment Tracking
-          </h1>
-          <p style={{ color: '#6B7394' }}>Monitor and manage all platform payments</p>
-        </div>
+    <AdminLayout title="Payments" subtitle="Monitor and manage all platform payments">
+      {/* Summary */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, marginBottom: 28 }}>
+        {summaryCards.map((c) => (
+          <div key={c.label} style={{ padding: '20px', borderRadius: 14, background: c.bg, border: `1px solid ${c.border}` }}>
+            <div style={{ fontSize: 12, color: '#6B7394', marginBottom: 4 }}>{c.label}</div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: c.color, fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{c.value}</div>
+          </div>
+        ))}
+      </div>
 
-        {/* Summary */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, marginBottom: 28 }}>
-          <div style={{ padding: '20px', borderRadius: 14, background: 'rgba(0,229,255,0.06)', border: '1px solid rgba(0,229,255,0.15)' }}>
-            <div style={{ fontSize: 12, color: '#6B7394', marginBottom: 4 }}>Total Revenue</div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: '#fff', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>KES {totalRevenue.toLocaleString()}</div>
-          </div>
-          <div style={{ padding: '20px', borderRadius: 14, background: 'rgba(0,230,118,0.06)', border: '1px solid rgba(0,230,118,0.15)' }}>
-            <div style={{ fontSize: 12, color: '#6B7394', marginBottom: 4 }}>Completed</div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: '#00E676', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{payments.filter(p => p.status === 'completed').length}</div>
-          </div>
-          <div style={{ padding: '20px', borderRadius: 14, background: 'rgba(255,145,0,0.06)', border: '1px solid rgba(255,145,0,0.15)' }}>
-            <div style={{ fontSize: 12, color: '#6B7394', marginBottom: 4 }}>Pending</div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: '#FF9100', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{payments.filter(p => p.status === 'pending').length}</div>
-          </div>
-          <div style={{ padding: '20px', borderRadius: 14, background: 'rgba(255,82,82,0.06)', border: '1px solid rgba(255,82,82,0.15)' }}>
-            <div style={{ fontSize: 12, color: '#6B7394', marginBottom: 4 }}>Failed</div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: '#FF5252', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{payments.filter(p => p.status === 'failed').length}</div>
-          </div>
-        </div>
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+        <input
+          type="text"
+          placeholder="Search by user, email, or reference..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="form-input"
+          style={{ minWidth: 280, width: 'auto' }}
+        />
+        {['all', 'completed', 'pending', 'failed'].map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className="btn btn-sm"
+            style={{
+              border: `1px solid ${filter === f ? 'rgba(0,229,255,0.3)' : 'rgba(255,255,255,0.06)'}`,
+              background: filter === f ? 'rgba(0,229,255,0.08)' : 'transparent',
+              color: filter === f ? '#00E5FF' : '#B0B8D1',
+              textTransform: 'capitalize',
+              cursor: 'pointer',
+            }}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
 
-        {/* Filters */}
-        <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-          <input
-            type="text"
-            placeholder="Search by user, email, or reference..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ padding: '10px 16px', background: '#0F1535', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#fff', fontSize: 14, fontFamily: 'Inter', outline: 'none', minWidth: 280 }}
-          />
-          {['all', 'completed', 'pending', 'failed'].map((f) => (
-            <button key={f} onClick={() => setFilter(f)}
-              style={{
-                padding: '8px 20px', borderRadius: 8,
-                border: `1px solid ${filter === f ? 'rgba(0,229,255,0.3)' : 'rgba(255,255,255,0.06)'}`,
-                background: filter === f ? 'rgba(0,229,255,0.08)' : 'transparent',
-                color: filter === f ? '#00E5FF' : '#B0B8D1',
-                fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter',
-                textTransform: 'capitalize',
-              }}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-
-        {/* Payments Table */}
-        <div style={{ background: '#131849', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, color: '#6B7394', fontWeight: 600, background: '#0F1535', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>User</th>
-                <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, color: '#6B7394', fontWeight: 600, background: '#0F1535', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>Plan</th>
-                <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, color: '#6B7394', fontWeight: 600, background: '#0F1535', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>Amount</th>
-                <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, color: '#6B7394', fontWeight: 600, background: '#0F1535', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>Method</th>
-                <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, color: '#6B7394', fontWeight: 600, background: '#0F1535', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>Reference</th>
-                <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, color: '#6B7394', fontWeight: 600, background: '#0F1535', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>Status</th>
-                <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, color: '#6B7394', fontWeight: 600, background: '#0F1535', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((p) => {
-                const badge = getStatusBadge(p.status);
-                return (
-                  <tr key={p.id}>
-                    <td style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                      <div style={{ color: '#fff', fontSize: 14, fontWeight: 600 }}>{p.user}</div>
-                      <div style={{ color: '#6B7394', fontSize: 12 }}>{p.email}</div>
-                    </td>
-                    <td style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#FFD700', fontSize: 14, fontWeight: 600 }}>{p.plan}</td>
-                    <td style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#fff', fontSize: 14, fontWeight: 700 }}>KES {p.amount.toLocaleString()}</td>
-                    <td style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#B0B8D1', fontSize: 14 }}>{p.method}</td>
-                    <td style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#B0B8D1', fontSize: 13, fontFamily: 'monospace' }}>{p.ref}</td>
-                    <td style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                      <span style={{ padding: '3px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600, background: badge.bg, color: badge.color }}>
-                        {badge.text}
-                      </span>
-                    </td>
-                    <td style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#6B7394', fontSize: 14 }}>{p.date}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </main>
-      <Footer />
-    </div>
+      {/* Payments Table */}
+      <div className="table-container">
+        <table className="premium-table">
+          <thead>
+            <tr>
+              {['User', 'Plan', 'Amount', 'Method', 'Reference', 'Status', 'Date'].map((h) => (
+                <th key={h}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((p) => {
+              const badge = getStatusBadge(p.status);
+              return (
+                <tr key={p.id}>
+                  <td>
+                    <div className="font-semibold text-white">{p.user}</div>
+                    <div style={{ color: '#6B7394', fontSize: 12 }}>{p.email}</div>
+                  </td>
+                  <td style={{ color: '#FFD700', fontWeight: 600 }}>{p.plan}</td>
+                  <td className="font-bold text-white">KES {p.amount.toLocaleString()}</td>
+                  <td style={{ color: '#B0B8D1' }}>{p.method}</td>
+                  <td style={{ color: '#B0B8D1', fontSize: 13, fontFamily: 'monospace' }}>{p.ref}</td>
+                  <td>
+                    <span style={{ padding: '3px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600, background: badge.bg, color: badge.color }}>
+                      {badge.text}
+                    </span>
+                  </td>
+                  <td style={{ color: '#6B7394' }}>{p.date}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </AdminLayout>
   );
 }

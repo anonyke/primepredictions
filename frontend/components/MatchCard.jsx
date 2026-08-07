@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { getCategoryByValue } from '../lib/predictionCategories';
 
 export default function MatchCard({ 
   home = 'Home Team', 
@@ -11,9 +12,14 @@ export default function MatchCard({
   odds = '2.10',
   confidence = 85,
   isPremium = false,
-  type = '1X2'
+  type = '1X2',
+  featured = false
 }) {
   const [expanded, setExpanded] = useState(false);
+
+  const cat = getCategoryByValue(type);
+  const catIcon = cat?.icon || '⚽';
+  const catColor = cat?.color || '#00E5FF';
 
   const getConfidenceColor = (val) => {
     if (val >= 80) return '#00E676';

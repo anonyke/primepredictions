@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { getCategoryByValue } from '../lib/predictionCategories';
 
 export default function PredictionCard({
   event,
@@ -18,6 +19,12 @@ export default function PredictionCard({
   const [expanded, setExpanded] = useState(false);
 
   const title = match || event || `${home || 'Home'} vs ${away || 'Away'}`;
+
+  // Resolve category metadata (icon + color) from the shared category system
+  const cat = getCategoryByValue(type);
+  const catIcon = cat?.icon || '⚽';
+  const catColor = cat?.color || '#00E5FF';
+
   const getConfidenceColor = (val) => {
     if (val >= 80) return '#00E676';
     if (val >= 60) return '#FF9100';
@@ -26,18 +33,16 @@ export default function PredictionCard({
 
   return (
     <div
-      className="relative rounded-2xl p-5 cursor-pointer transition-all duration-300 overflow-hidden"
+      className="premium-card relative p-5 cursor-pointer overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, rgba(19,24,73,0.92), rgba(28,34,96,0.88))',
         border: `1px solid ${isPremium ? 'rgba(124,77,255,0.35)' : 'rgba(255,255,255,0.07)'}`,
-        boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-4px)';
         e.currentTarget.style.boxShadow = isPremium
           ? '0 0 30px rgba(124,77,255,0.25), 0 12px 40px rgba(0,0,0,0.45)'
-          : '0 0 24px rgba(0,229,255,0.08), 0 12px 40px rgba(0,0,0,0.45)';
-        e.currentTarget.style.borderColor = isPremium ? 'rgba(124,77,255,0.6)' : 'rgba(0,229,255,0.2)';
+          : `0 0 24px ${catColor}22, 0 12px 40px rgba(0,0,0,0.45)`;
+        e.currentTarget.style.borderColor = isPremium ? 'rgba(124,77,255,0.6)' : `${catColor}55`;
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
@@ -50,21 +55,20 @@ export default function PredictionCard({
       <div
         className="absolute -top-10 -right-10 w-32 h-32 rounded-full pointer-events-none"
         style={{
-          background: `radial-gradient(circle, ${isPremium ? 'rgba(124,77,255,0.12)' : 'rgba(0,229,255,0.08)'} 0%, transparent 70%)`,
+          background: `radial-gradient(circle, ${isPremium ? 'rgba(124,77,255,0.12)' : `${catColor}14`} 0%, transparent 70%)`,
         }}
       />
 
       {isPremium && (
-        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider"
-          style={{ background: 'linear-gradient(135deg, #7C4DFF, #FFD700)', color: '#0A0E27' }}
-        >
+        <div className="premium-badge absolute top-3 right-3">
           ⭐ Premium
         </div>
       )}
 
       {/* Header: league + time */}
       <div className="flex items-center justify-between mb-4">
-        <span className="px-2.5 py-1 rounded-md text-[11px] font-semibold" style={{ background: 'rgba(255,255,255,0.06)', color: '#6B7394' }}>
+        <span className="category-chip">
+          <span>{catIcon}</span>
           {league}
         </span>
         <span className="text-xs font-medium" style={{ color: '#6B7394' }}>🕒 {time}</span>
@@ -77,7 +81,7 @@ export default function PredictionCard({
 
       {/* Prediction & odds */}
       <div className="grid grid-cols-2 gap-2 mb-3">
-        <div className="text-center py-2.5 px-2 rounded-lg" style={{ background: 'rgba(0,229,255,0.06)', border: '1px solid rgba(0,229,255,0.12)' }}>
+        <div className="text-center py-2.5 px-2 rounded-lg" style={{ background: `${catColor}10`, border: `1px solid ${catColor}30` }}>
           <div className="text-[11px] mb-1" style={{ color: '#6B7394' }}>Prediction</div>
           <div className="text-lg font-extrabold" style={{ color: '#00E5FF' }}>{prediction}</div>
         </div>
@@ -89,23 +93,32 @@ export default function PredictionCard({
 
       {/* Type chip */}
       <div className="text-center mb-3 py-1 px-2 rounded-md text-xs font-medium" style={{ background: 'rgba(255,255,255,0.03)', color: '#B0B8D1' }}>
+        <span className="mr-1">{catIcon}</span>
         {type}
       </div>
 
-      {/* Confidence */}
-      <div>
-        <div className="flex justify-between mb-1.5 text-xs" style={{ color: '#B0B8D1' }}>
-          <span>Confidence</span>
-          <span className="font-bold" style={{ color: getConfidenceColor(confidence) }}>{confidence}%</span>
+      {/* Confidence ring + bar */}
+      <div className="flex items-center gap-3">
+        <div
+          className="confidence-ring"
+          style={{ background: `conic-gradient(${getConfidenceColor(confidence)} ${confidence}%, rgba(255,255,255,0.08) 0%)` }}
+        >
+          <span style={{ color: getConfidenceColor(confidence) }}>{confidence}%</span>
         </div>
-        <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
-          <div
-            className="h-full rounded-full transition-all duration-1000"
-            style={{
-              width: `${confidence}%`,
-              background: `linear-gradient(90deg, ${getConfidenceColor(confidence)}, #00E5FF)`,
-            }}
-          />
+        <div className="flex-1">
+          <div className="flex justify-between mb-1.5 text-xs" style={{ color: '#B0B8D1' }}>
+            <span>Confidence</span>
+            <span className="font-bold" style={{ color: getConfidenceColor(confidence) }}>{confidence}%</span>
+          </div>
+          <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
+            <div
+              className="h-full rounded-full transition-all duration-1000"
+              style={{
+                width: `${confidence}%`,
+                background: `linear-gradient(90deg, ${getConfidenceColor(confidence)}, #00E5FF)`,
+              }}
+            />
+          </div>
         </div>
       </div>
 

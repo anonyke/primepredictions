@@ -1,7 +1,23 @@
-// Support both NEXT_PUBLIC_API_URL and NEXT_PUBLIC_API_BASE_URL for compatibility
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+// Production API base URL - standardized on NEXT_PUBLIC_API_URL.
+// In production, this MUST be set in Vercel to the deployed backend URL.
+// localhost fallback is only used for local development.
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  (typeof window !== 'undefined' && window.location.hostname === 'localhost'
+    ? 'http://localhost:4000'
+    : '');
 // Custom API key sent to the backend on every request
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
+
+// Helper to resolve the final API base, throwing a clear error in production
+// if it was never configured (instead of silently failing with "Failed to fetch").
+function resolveApiBase() {
+  if (API_BASE) return API_BASE.replace(/\/$/, '');
+  throw new Error(
+    'API base URL is not configured. Set NEXT_PUBLIC_API_URL in Vercel to your deployed backend URL.'
+  );
+}
 
 class ApiError extends Error {
   constructor(status, message, details = null) {
@@ -39,7 +55,7 @@ export async function apiFetch(path, { method = 'GET', body, token, headers: ext
     ...extraHeaders,
   };
 
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetch(`${resolveApiBase()}${path}`, {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
@@ -77,6 +93,8 @@ export const paymentsApi = {
     return apiFetch(`/api/payments/history${query ? `?${query}` : ''}`);
   },
   verify: (reference) => apiFetch(`/api/payments/verify/${reference}`),
+  // PesaPal status check after callback redirect
+  checkPesapalStatus: (reference) => apiFetch(`/api/payments/pesapal/status/${reference}`),
 };
 
 // User API

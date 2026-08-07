@@ -10,7 +10,7 @@ import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import predictionRoutes from './routes/predictionRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
-import { handleStripeWebhookRaw } from './controllers/paymentController.js';
+import { handleStripeWebhookRaw, handlePesapalIpn } from './controllers/paymentController.js';
 import adminRoutes from './routes/adminRoutes.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { requireApiKey } from './middleware/apiKey.js';
@@ -25,9 +25,26 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
 }));
 
-// CORS
+// CORS - allow the production frontend domain(s) plus localhost for development.
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'https://primepredictions-one.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:4000',
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin(origin, callback) {
+    // Allow requests with no origin (e.g., server-to-server, curl, webhooks).
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    // Allow any Vercel preview/deployment origin for the frontend project.
+    if (origin && origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
@@ -57,6 +74,14 @@ app.use('/api/auth/register', authLimiter);
 // Stripe webhook needs raw body for signature verification
 app.post('/api/payments/webhook/stripe', bodyParser.raw({ type: 'application/json' }), (req, res) => {
   return handleStripeWebhookRaw(req, res);
+});
+
+// PesaPal IPN webhook needs raw body for signature verification.
+// Registered before the JSON parser and before the API-key gate so PesaPal
+// can reach it with its signature-only auth.
+app.post('/api/payments/pesapal/ipn', bodyParser.raw({ type: 'application/json' }), (req, res) => {
+  req.rawBody = req.body;
+  return handlePesapalIpn(req, res);
 });
 
 // Body parsing
@@ -113,7 +138,17 @@ const startServer = async () => {
   });
 };
 
-startServer();
+// Vercel serverless: export the app directly (no listen()).
+// `@vercel/node` handles requests. Only start a listener when running
+// locally (e.g., `node server.js` / pm2) — never in serverless.
+const isServerless =
+  process.env.VERCEL === '1' ||
+  process.env.AWS_LAMBDA_FUNCTION_NAME ||
+  process.env.NOW_REGION;
+
+if (!isServerless) {
+  startServer();
+}
 
 export default app;
 

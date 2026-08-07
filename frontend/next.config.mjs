@@ -5,11 +5,17 @@ const nextConfig = {
     domains: [],
     unoptimized: true,
   },
-  async rewrites() {
+async rewrites() {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
+    // In production, NEXT_PUBLIC_API_URL must be set to the deployed backend URL.
+    // If it is not set, fall back to a same-origin rewrite (the frontend domain).
+    const destination = apiBase
+      ? `${apiBase.replace(/\/$/, '')}/api/:path*`
+      : '/api/:path*';
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000'}/api/:path*`,
+        destination,
       },
     ];
   },

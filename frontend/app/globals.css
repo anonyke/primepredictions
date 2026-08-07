@@ -874,3 +874,217 @@ a:hover {
   flex: 1;
 }
 
+/* ============================================================
+   PREMIUM REDESIGN — ADDITIONS
+   ============================================================ */
+
+/* Stadium background texture (subtle, premium) */
+.stadium-bg {
+  position: relative;
+}
+
+.stadium-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(0, 229, 255, 0.06), transparent 40%),
+    radial-gradient(circle at 80% 20%, rgba(124, 77, 255, 0.08), transparent 40%),
+    radial-gradient(circle at 50% 90%, rgba(0, 229, 255, 0.05), transparent 45%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.stadium-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Premium card variant — softer, more elevated */
+.premium-card {
+  background: linear-gradient(160deg, rgba(28, 34, 96, 0.9), rgba(19, 24, 73, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.premium-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(0, 229, 255, 0.25);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), 0 0 30px rgba(0, 229, 255, 0.08);
+}
+
+/* Category chip */
+.category-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #B0B8D1;
+  white-space: nowrap;
+}
+
+/* Premium badge */
+.premium-badge {
+  background: var(--gradient-secondary);
+  color: #0A0E27;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  box-shadow: 0 0 18px rgba(124, 77, 255, 0.4);
+}
+
+/* Confidence ring wrapper */
+.confidence-ring {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.confidence-ring span {
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: #131849;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+/* Section eyebrow label */
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(0, 229, 255, 0.08);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  color: #00E5FF;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+/* Welcome hero for dashboard */
+.welcome-hero {
+  background: linear-gradient(135deg, rgba(124, 77, 255, 0.12), rgba(0, 229, 255, 0.06), transparent);
+  border: 1px solid rgba(124, 77, 255, 0.2);
+  border-radius: 24px;
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.welcome-hero::after {
+  content: '⚽';
+  position: absolute;
+  right: 24px;
+  bottom: -10px;
+  font-size: 120px;
+  opacity: 0.06;
+  transform: rotate(-12deg);
+}
+
+/* Stat value emphasis */
+.stat-value {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+/* Hover lift for link cards */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card);
+}
+
+/* Premium table row hover */
+.premium-table tbody tr {
+  transition: background 0.25s ease;
+}
+
+.premium-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Responsive niceties */
+@media (max-width: 640px) {
+  .welcome-hero {
+    padding: 24px;
+  }
+  .premium-card {
+    border-radius: 16px;
+  }
+}
+
+/* ============================================================
+   PRO COMMUNITY DESIGN SYSTEM — ADDITIONS
+   ============================================================ */
+
+/* Page header (shared) */
+.page-header {
+  margin-bottom: 40px;
+}
+.page-header.text-left {
+  text-align: left;
+}
+.page-header.text-left .page-header-subtitle {
+  margin-left: 0;
+}
+.page-header .section-eyebrow {
+  margin-bottom: 16px;
+  background: rgba(0, 229, 255, 0.08);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  color: #00E5FF;
+}
+html[data-theme="light"] .page-header .section-eyebrow {
+  background: rgba(0, 184, 204, 0.08);
+  border-color: rgba(0, 184, 204, 0.25);
+  color: var(--primary);
+}
+.page-header-title {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0 0 14px;
+  color: var(--text-primary);
+}
+.page-header-title .text-gradient {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.page-header-subtitle {
+  color: var(--text-tertiary);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin: 0 auto;
+}
+
+

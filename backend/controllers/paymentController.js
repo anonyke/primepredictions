@@ -2,6 +2,7 @@ import Payment from '../models/Payment.js';
 import Subscription from '../models/Subscription.js';
 import User from '../models/User.js';
 import getStripe from '../services/stripe.js';
+import { createPesapalOrder, getTransactionStatus, verifyIpnSignature } from '../services/pesapal.js';
 
 export async function createPayment(req, res) {
   try {
@@ -55,7 +56,49 @@ export async function createPayment(req, res) {
         cancel_url: cancelUrl,
       });
 
-      return res.status(201).json({ payment, checkoutUrl: session.url });
+return res.status(201).json({ payment, checkoutUrl: session.url });
+    }
+
+    // PesaPal hosted checkout
+    if (provider === 'pesapal') {
+      const payment = await Payment.create({
+        userId: req.user.id,
+        provider,
+        amount,
+        currency,
+        reference,
+        phoneNumber,
+        email,
+        description,
+        metadata,
+        status: 'pending',
+      });
+
+      const firstName = metadata?.firstName || req.user?.name?.split(' ')[0] || '';
+      const lastName = metadata?.lastName || req.user?.name?.split(' ')[1] || '';
+
+      const order = await createPesapalOrder({
+        amount,
+        currency,
+        description: description || 'PrimePredict Premium Subscription',
+        reference,
+        email,
+        phoneNumber,
+        firstName,
+        lastName,
+      });
+
+      // Store the PesaPal tracking id for IPN/callback verification
+      payment.transactionId = order.orderTrackingId || null;
+      payment.receiptUrl = order.redirectUrl;
+      await payment.save();
+
+      return res.status(201).json({
+        payment,
+        checkoutUrl: order.redirectUrl,
+        orderTrackingId: order.orderTrackingId,
+        reference,
+      });
     }
 
     const payment = await Payment.create({
@@ -73,7 +116,140 @@ export async function createPayment(req, res) {
     res.status(201).json({ payment });
   } catch (err) {
     console.error('Create payment error:', err);
-    res.status(500).json({ error: 'Failed to create payment' });
+    res.status(500).json({ error: `Failed to create payment: ${err.message}` });
+  }
+}
+
+// Helper to create or extend a subscription after a successful payment.
+async function activateSubscription(payment, status = 'completed') {
+  const plan = payment.metadata?.plan || 'monthly';
+  const durationMap = { weekly: 7, monthly: 30, yearly: 365 };
+  const days = durationMap[plan] || 30;
+
+  let subscription = await Subscription.findOne({ userId: payment.userId, status: 'active' });
+
+  if (subscription) {
+    subscription.expiresAt = new Date(subscription.expiresAt.getTime() + days * 86400000);
+    subscription.paymentReference = payment.reference;
+    subscription.paymentMethod = payment.provider;
+    await subscription.save();
+  } else {
+    subscription = await Subscription.create({
+      userId: payment.userId,
+      plan,
+      status: 'active',
+      price: payment.amount,
+      currency: payment.currency,
+      expiresAt: new Date(Date.now() + days * 86400000),
+      paymentReference: payment.reference,
+      paymentMethod: payment.provider,
+    });
+
+    await User.findByIdAndUpdate(payment.userId, { subscriptionId: subscription._id });
+  }
+
+  return subscription;
+}
+
+// PesaPal IPN webhook handler (called by PesaPal server with raw body).
+export async function handlePesapalIpn(req, res) {
+  let payload = req.body;
+  const rawBody = req.rawBody || (Buffer.isBuffer(payload) ? payload.toString('utf8') : JSON.stringify(payload));
+
+  try {
+    if (Buffer.isBuffer(payload)) {
+      payload = JSON.parse(payload.toString('utf8'));
+    }
+
+    const signature = req.headers['pesapal-signature'] || req.headers['x-pesapal-signature'];
+    if (!verifyIpnSignature(rawBody, signature)) {
+      return res.status(401).json({ error: 'Invalid IPN signature' });
+    }
+
+    const orderTrackingId = payload.order_tracking_id || payload.orderTrackingId || payload.tracking_id;
+    const merchantReference = payload.merchant_reference || payload.merchantReference;
+    const status = payload.payment_status_description || payload.status || payload.payment_status;
+
+    // Find payment by reference or transactionId
+    let payment = merchantReference
+      ? await Payment.findOne({ reference: merchantReference })
+      : null;
+    if (!payment && orderTrackingId) {
+      payment = await Payment.findOne({ transactionId: orderTrackingId });
+    }
+
+    if (!payment) {
+      return res.status(404).json({ error: 'Payment not found for IPN' });
+    }
+
+    payment.webhookReceived = true;
+    payment.webhookData = payload;
+    if (orderTrackingId) payment.transactionId = orderTrackingId;
+
+    const upperStatus = String(status || '').toUpperCase();
+    if (upperStatus.includes('COMPLET')) {
+      payment.status = 'completed';
+      payment.processedAt = new Date();
+      await payment.save();
+      await activateSubscription(payment);
+    } else if (upperStatus.includes('FAIL') || upperStatus.includes('ERROR') || upperStatus.includes('CANCEL') || upperStatus.includes('DECLINE')) {
+      payment.status = 'failed';
+      payment.failedAt = new Date();
+      payment.failureReason = status || 'Payment failed';
+      await payment.save();
+    } else {
+      payment.status = 'pending';
+      await payment.save();
+    }
+
+    return res.json({ received: true });
+  } catch (err) {
+    console.error('PesaPal IPN error:', err);
+    return res.status(500).json({ error: 'IPN processing failed' });
+  }
+}
+
+// PesaPal status check endpoint (called by frontend after callback redirect).
+export async function checkPesapalStatus(req, res) {
+  try {
+    const { reference } = req.params;
+    const payment = await Payment.findOne({ reference });
+
+    if (!payment) {
+      return res.status(404).json({ error: 'Payment not found' });
+    }
+
+    // If we already know it's completed/failed, return early.
+    if (payment.status === 'completed' || payment.status === 'failed') {
+      return res.json({ payment, status: payment.status });
+    }
+
+    // Otherwise query PesaPal for the latest status.
+    if (payment.transactionId) {
+      try {
+        const txn = await getTransactionStatus(payment.transactionId);
+        const status = String(txn.status || txn.payment_status_description || '').toUpperCase();
+        if (status.includes('COMPLET')) {
+          payment.status = 'completed';
+          payment.processedAt = new Date();
+          payment.webhookData = txn;
+          await payment.save();
+          await activateSubscription(payment);
+        } else if (status.includes('FAIL') || status.includes('CANCEL') || status.includes('DECLINE')) {
+          payment.status = 'failed';
+          payment.failedAt = new Date();
+          payment.failureReason = txn.status || 'Payment failed';
+          await payment.save();
+        }
+      } catch (err) {
+        console.error('PesaPal status check failed:', err.message);
+      }
+    }
+
+    return res.json({ payment, status: payment.status });
+  } catch (err) {
+    console.error('Check PesaPal status error:', err);
+    return res.status(500).json({ error: 'Failed to check payment status' });
   }
 }
 

@@ -9,6 +9,11 @@ const connectionOptions = {
 
 let isConnected = false;
 
+// Cache the in-flight connection promise so concurrent requests reuse a single
+// connection attempt. Important for serverless (Vercel) where each invocation
+// may try to connect simultaneously.
+let connectionPromise = null;
+
 export async function connectDB() {
   const uri = process.env.MONGODB_URI;
 
@@ -19,58 +24,70 @@ export async function connectDB() {
     return { connected: false, message: 'No MongoDB URI configured' };
   }
 
+  // Reuse an existing connection or an in-flight connection attempt.
   if (isConnected) {
     console.log('Using existing MongoDB connection');
     return { connected: true };
   }
-
-  try {
-    mongoose.set('strictQuery', true);
-
-    const db = await mongoose.connect(uri, connectionOptions);
-
-    isConnected = db.connections[0].readyState === 1;
-
-    if (isConnected) {
-      console.log(`MongoDB connected: ${db.connection.host}`);
-    }
-
-    // Handle connection events
-    mongoose.connection.on('error', (err) => {
-      console.error('MongoDB connection error:', err);
-      isConnected = false;
-    });
-
-    mongoose.connection.on('disconnected', () => {
-      console.log('MongoDB disconnected');
-      isConnected = false;
-    });
-
-    mongoose.connection.on('reconnected', () => {
-      console.log('MongoDB reconnected');
-      isConnected = true;
-    });
-
-    // Graceful shutdown
-    process.on('SIGINT', async () => {
-      await mongoose.connection.close();
-      console.log('MongoDB connection closed through app termination');
-      process.exit(0);
-    });
-
-    return { connected: true };
-  } catch (err) {
-    console.error('MongoDB connection error:', err.message);
-    isConnected = false;
-
-    // Retry logic
-    if (process.env.NODE_ENV === 'production') {
-      console.log('Retrying connection in 5 seconds...');
-      setTimeout(connectDB, 5000);
-    }
-
-    return { connected: false, error: err.message };
+  if (connectionPromise) {
+    return connectionPromise;
   }
+
+  connectionPromise = (async () => {
+    try {
+      mongoose.set('strictQuery', true);
+
+      const db = await mongoose.connect(uri, connectionOptions);
+
+      isConnected = db.connections[0].readyState === 1;
+
+      if (isConnected) {
+        console.log(`MongoDB connected: ${db.connection.host}`);
+      }
+
+      // Handle connection events
+      mongoose.connection.on('error', (err) => {
+        console.error('MongoDB connection error:', err);
+        isConnected = false;
+      });
+
+      mongoose.connection.on('disconnected', () => {
+        console.log('MongoDB disconnected');
+        isConnected = false;
+      });
+
+      mongoose.connection.on('reconnected', () => {
+        console.log('MongoDB reconnected');
+        isConnected = true;
+      });
+
+      // Graceful shutdown (only relevant for long-running Node processes)
+      if (typeof process !== 'undefined' && !process.env.VERCEL) {
+        process.on('SIGINT', async () => {
+          await mongoose.connection.close();
+          console.log('MongoDB connection closed through app termination');
+          process.exit(0);
+        });
+      }
+
+      return { connected: true };
+    } catch (err) {
+      console.error('MongoDB connection error:', err.message);
+      isConnected = false;
+
+      // NOTE: No setTimeout retry here — it is not safe in serverless
+      // (Vercel) because timers can keep the function alive and module state
+      // is not persisted between invocations. Each request will retry naturally.
+      return { connected: false, error: err.message };
+    }
+  })();
+
+  // Allow the next call to retry after a failure (reset the cached promise).
+  connectionPromise.catch(() => {
+    connectionPromise = null;
+  });
+
+  return connectionPromise;
 }
 
 export function getConnectionStatus() {
@@ -91,4 +108,3 @@ export async function disconnectDB() {
     console.error('Error disconnecting MongoDB:', err);
   }
 }
-

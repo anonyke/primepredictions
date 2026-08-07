@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 const socials = [
   {
@@ -30,6 +31,11 @@ const paymentMethods = ['📱 M-Pesa', '💳 Cards', '🏦 PesaPal', '💎 Strip
 export default function Footer() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const pathname = usePathname();
+
+  // Hide the public footer on the dedicated /admin layout
+  const isAdminRoute = pathname === '/admin' || pathname.startsWith('/admin/');
+  if (isAdminRoute) return null;
 
   const handleSubscribe = (e) => {
     e.preventDefault();

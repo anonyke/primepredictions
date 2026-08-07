@@ -268,7 +268,10 @@ export default function PricingPage() {
               >
                 ✕
               </button>
-              <PaymentForm />
+<PaymentForm
+                selectedPlan={selectedPlan}
+                onSuccess={() => setShowPayment(false)}
+              />
             </div>
           </div>
         )}

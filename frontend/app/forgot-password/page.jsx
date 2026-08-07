@@ -13,11 +13,20 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     setMessage('');
 
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-      const response = await fetch(`${apiUrl}/api/auth/request-password-reset`, {
+try {
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL ||
+        process.env.NEXT_PUBLIC_API_BASE_URL ||
+        (typeof window !== 'undefined' && window.location.hostname === 'localhost'
+          ? 'http://localhost:4000'
+          : '');
+      const apiKey = process.env.NEXT_PUBLIC_API_KEY || '';
+      const response = await fetch(`${apiUrl.replace(/\/$/, '')}/api/auth/request-password-reset`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(apiKey ? { 'x-api-key': apiKey } : {}),
+        },
         body: JSON.stringify({ email }),
       });
       const data = await response.json();
