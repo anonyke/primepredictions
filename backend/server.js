@@ -28,6 +28,7 @@ app.use(helmet({
 // CORS - allow the production frontend domain(s) plus localhost for development.
 const allowedOrigins = [
   process.env.FRONTEND_URL,
+  process.env.RENDER_FRONTEND_URL,
   'https://primepredictions-one.vercel.app',
   'http://localhost:3000',
   'http://localhost:4000',
@@ -41,6 +42,10 @@ app.use(cors({
     }
     // Allow any Vercel preview/deployment origin for the frontend project.
     if (origin && origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+    // Allow any Render frontend deployment origin.
+    if (origin && origin.endsWith('.onrender.com')) {
       return callback(null, true);
     }
     return callback(new Error('Not allowed by CORS'));
