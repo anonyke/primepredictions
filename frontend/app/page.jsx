@@ -1,251 +1,363 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import MatchCard from '../components/MatchCard';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import PredictionCard from '../components/PredictionCard';
 import { predictionsApi } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+
+// ============ CATEGORY NAV ============
+const categoryTabs = [
+  { id: 'all', label: 'All Picks', icon: '📋' },
+  { id: 'free', label: 'FREE PICKS', icon: '⚽' },
+  { id: 'banker', label: 'BANKER', icon: '🏦' },
+  { id: 'double-chance', label: 'DOUBLE CHANCE', icon: '🛡️' },
+  { id: 'over-1.5', label: 'OVER 1.5', icon: '⚽' },
+  { id: 'over-2.5', label: 'OVER 2.5', icon: '⚽' },
+  { id: 'btts', label: 'BTTS', icon: '🤝' },
+  { id: 'vip', label: 'VIP PICKS', icon: '👑' },
+];
+
+// Map category tab id to backend category values (client-side filter)
+const categoryValueMap = {
+  'all': null,
+  'free': null, // free picks = not premium
+  'banker': ['Banker Tips', '1X2'],
+  'double-chance': ['Double Chance'],
+  'over-1.5': ['Over 1.5 Goals', 'Over/Under'],
+  'over-2.5': ['Over 2.5 Goals', 'Over/Under'],
+  'btts': ['BTTS'],
+  'vip': null, // vip = premium only
+};
+
+const stats = [
+  { value: '87%', label: 'Win Rate', icon: '🏆' },
+  { value: '50+', label: 'Daily Picks', icon: '📊' },
+  { value: '19', label: 'Categories', icon: '🎯' },
+  { value: '10K+', label: 'Happy Bettors', icon: '👥' },
+];
+
+const vipFeatures = [
+  { icon: '⭐', label: 'VIP Predictions' },
+  { icon: '🎯', label: 'High-Confidence Selections' },
+  { icon: '✅', label: 'Correct Score' },
+  { icon: '📈', label: 'Accumulator' },
+  { icon: '🏦', label: 'Banker' },
+  { icon: '🔍', label: 'Premium Analysis' },
+];
 
 function mapPrediction(p) {
+  const home = p.matchName?.home || '';
+  const away = p.matchName?.away || '';
   return {
     id: p._id,
-    match: `${p.matchName?.home || ''} vs ${p.matchName?.away || ''}`,
+    home,
+    away,
+    match: `${home} vs ${away}`,
     league: p.league || '',
     type: p.category || '1X2',
     prediction: p.prediction || '',
     odds: p.odds || '',
     confidence: p.confidence || 0,
     isPremium: p.isPremium || false,
-    time: p.kickoff ? new Date(p.kickoff).toLocaleString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Today',
+    status: p.status || 'pending',
+    kickoff: p.kickoff,
+    time: p.kickoff ? new Date(p.kickoff) : (p.kickoffString || 'Today'),
   };
 }
 
-const stats = [
-  { value: '87%', label: 'Win Rate', icon: '🏆' },
-  { value: '50+', label: 'Daily Picks', icon: '📊' },
-  { value: '6', label: 'Categories', icon: '🎯' },
-  { value: '10K+', label: 'Happy Bettors', icon: '👥' },
-];
-
-const features = [
-  {
-    icon: '📊',
-    title: 'Data-Driven Analysis',
-    desc: 'Our models analyze form, head-to-head, xG, and market trends to deliver high-confidence picks.',
-  },
-  {
-    icon: '🎯',
-    title: '6 Prediction Categories',
-    desc: 'From 1X2 and Over/Under to Correct Score and HT/FT — we cover every major betting market.',
-  },
-  {
-    icon: '⚡',
-    title: 'Instant Alerts',
-    desc: 'Get notified the moment new predictions drop so you never miss a high-value opportunity.',
-  },
-  {
-    icon: '🔒',
-    title: 'Secure Payments',
-    desc: 'Pay seamlessly with M-Pesa, Stripe, Flutterwave, PesaPal, or crypto — fully encrypted.',
-  },
-  {
-    icon: '👑',
-    title: 'Premium Picks',
-    desc: 'Unlock exclusive correct-score tips and expert analysis with a proven track record.',
-  },
-  {
-    icon: '📈',
-    title: 'Track Performance',
-    desc: 'Follow your betting performance with an intuitive dashboard and transparent results.',
-  },
-];
-
-const steps = [
-  { num: '01', icon: '👤', title: 'Create Account', desc: 'Sign up for free in under a minute.' },
-  { num: '02', icon: '💎', title: 'Choose a Plan', desc: 'Pick Weekly, Monthly, or Yearly premium.' },
-  { num: '03', icon: '📊', title: 'Get Predictions', desc: 'Receive daily high-confidence picks.' },
-  { num: '04', icon: '🏆', title: 'Win Smarter', desc: 'Bet with data, not guesswork.' },
-];
-
-const testimonials = [
-  {
-    name: 'John Kamau',
-    role: 'Monthly Member · Nairobi',
-    quote: 'PrimePredict has completely changed how I bet. The 87% win rate is real — I\'ve been profitable for 3 straight months.',
-    initials: 'JK',
-  },
-  {
-    name: 'Mary Wanjiku',
-    role: 'Yearly Member · Mombasa',
-    quote: 'The correct score tips are worth every shilling. The dashboard makes it easy to track everything.',
-    initials: 'MW',
-  },
-  {
-    name: 'Peter Ochieng',
-    role: 'Weekly Member · Kisumu',
-    quote: 'I\'ve tried other prediction sites, but none come close. The analysis quality is on another level.',
-    initials: 'PO',
-  },
-];
-
-const todaysPicks = [
-  { id: 1, match: 'Manchester City vs Arsenal', league: 'Premier League', type: '1X2', prediction: '1', odds: '1.85', confidence: 84, isPremium: false, time: 'Today, 17:00' },
-  { id: 2, match: 'Bayern Munich vs Leipzig', league: 'Bundesliga', type: '1X2', prediction: '1', odds: '1.65', confidence: 88, isPremium: false, time: 'Today, 18:30' },
-  { id: 3, match: 'Liverpool vs Tottenham', league: 'Premier League', type: 'Over/Under', prediction: 'Over 2.5', odds: '1.72', confidence: 86, isPremium: false, time: 'Today, 20:00' },
-  { id: 4, match: 'Chelsea vs Man Utd', league: 'Premier League', type: 'Double Chance', prediction: '1X', odds: '1.25', confidence: 91, isPremium: true, time: 'Today, 18:00' },
-];
-
-function useScrollReveal() {
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('revealed');
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-    document.querySelectorAll('.scroll-reveal, .scroll-reveal-left, .scroll-reveal-right').forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
+// Format date for display
+function formatDateLabel(d) {
+  return d.toLocaleDateString('en-GB', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
 }
 
 export default function HomePage() {
-  useScrollReveal();
-  const [picks, setPicks] = useState(todaysPicks);
+  const { user } = useAuth();
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [allPredictions, setAllPredictions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
+  const [leagueFilter, setLeagueFilter] = useState('all');
 
-  useEffect(() => {
-    predictionsApi.list({ limit: 4 })
-      .then((data) => {
-        const list = (data.predictions || []).map(mapPrediction);
-        if (list.length > 0) setPicks(list.slice(0, 4));
-      })
-      .catch(() => { /* keep static fallback */ });
+  // Load all predictions from API (limit high enough for filtering)
+  const loadPredictions = useCallback(() => {
+    setLoading(true);
+    setError('');
+    predictionsApi.list({ limit: 200 })
+      .then((data) => setAllPredictions((data.predictions || []).map(mapPrediction)))
+      .catch((err) => setError(err.message || 'Failed to load predictions'))
+      .finally(() => setLoading(false));
   }, []);
 
-  return (
-    <div>
-      {/* ============ HERO ============ */}
-      <section className="relative pt-36 pb-20 overflow-hidden">
-        {/* Floating orbs */}
-        <div className="absolute top-24 -left-24 w-96 h-96 rounded-full pointer-events-none animate-floatSlow"
-          style={{ background: 'radial-gradient(circle, rgba(0,229,255,0.12), transparent 70%)' }} />
-        <div className="absolute bottom-0 -right-24 w-[28rem] h-[28rem] rounded-full pointer-events-none animate-floatSlow"
-          style={{ background: 'radial-gradient(circle, rgba(124,77,255,0.14), transparent 70%)', animationDelay: '1.5s' }} />
-        <div className="absolute top-1/2 left-1/3 w-40 h-40 rounded-full pointer-events-none animate-glow"
-          style={{ background: 'radial-gradient(circle, rgba(255,215,0,0.06), transparent 70%)' }} />
+  useEffect(() => {
+    loadPredictions();
+  }, [loadPredictions]);
 
-        <div className="relative max-w-6xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6 glass text-sm font-medium text-cyan-300 animate-fadeInUp">
+  // Move date by +/- days
+  const shiftDate = (days) => {
+    setSelectedDate(prev => {
+      const d = new Date(prev);
+      d.setDate(d.getDate() + days);
+      return d;
+    });
+  };
+
+  // Filter predictions by selected date, category, and league
+  const filteredPredictions = useMemo(() => {
+    return allPredictions.filter(p => {
+      // Date filter
+      const kick = p.kickoff ? new Date(p.kickoff) : null;
+      if (kick) {
+        const kd = new Date(kick);
+        kd.setHours(0, 0, 0, 0);
+        if (kd.getTime() !== selectedDate.getTime()) return false;
+      }
+
+      // League filter
+      if (leagueFilter !== 'all' && p.league?.toLowerCase() !== leagueFilter.toLowerCase()) return false;
+
+      // Category filter
+      if (activeCategory === 'vip') {
+        return p.isPremium;
+      }
+      if (activeCategory === 'free') {
+        return !p.isPremium;
+      }
+      const values = categoryValueMap[activeCategory];
+      if (values) {
+        return values.some(v => p.type?.toLowerCase() === v.toLowerCase());
+      }
+      return true; // all
+    });
+  }, [allPredictions, activeCategory, selectedDate, leagueFilter]);
+
+  // League options derived from data
+  const leagueOptions = useMemo(() => {
+    const set = new Set(allPredictions.map(p => p.league).filter(Boolean));
+    return ['all', ...Array.from(set)];
+  }, [allPredictions]);
+
+  const isToday = new Date().toDateString() === selectedDate.toDateString();
+
+  return (
+    <div className="w-full overflow-x-hidden">
+      {/* ============ HERO ============ */}
+      <section className="hero-football relative pt-28 pb-16 px-4 sm:px-6">
+        <div className="relative max-w-[1300px] mx-auto text-center">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 bg-white/10 border border-white/15 text-sm font-medium text-cyan-300">
             🇰🇪 Kenya&apos;s Most Trusted Prediction Platform
           </div>
 
-<h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6 animate-fadeInUp delay-100" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-            Smarter
-            <span className="block text-gradient">Football Predictions</span>
+          <h1 className="text-3xl sm:text-4xl lg:text-6xl font-extrabold leading-tight mb-5 text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+            Smart Football Predictions.
+            <span className="block text-gradient">Better Decisions.</span>
           </h1>
 
-          <p className="max-w-2xl mx-auto text-base sm:text-lg text-[#B0B8D1] mb-8 animate-fadeInUp delay-200">
-            Join 10,000+ bettors who rely on PrimePredict for expert football analysis,
-            premium tips, and a proven <strong className="text-white">87% win rate</strong>.
+          <p className="max-w-2xl mx-auto text-base sm:text-lg text-[#B0B8D1] mb-8">
+            Get carefully analyzed football predictions, daily picks, banker selections and
+            premium tips from our prediction platform.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14 animate-fadeInUp delay-300">
-            <a href="/pricing" className="btn btn-premium btn-lg">
-              ⭐ Get Premium Access
-            </a>
-            <a href="/predictions" className="btn btn-secondary btn-lg">
-              View Free Predictions
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+            {user ? (
+              <a href="/dashboard" className="btn btn-round btn-primary text-base">
+                📊 Go to Dashboard
+              </a>
+            ) : (
+              <a href="/register" className="btn btn-round btn-primary text-base">
+                Register / Login
+              </a>
+            )}
+            <a href="/premium" className="btn btn-round text-base" style={{ background: 'linear-gradient(135deg,#FFD700,#B8860B)', color: '#0A0E27', boxShadow: '0 0 24px rgba(255,215,0,0.35)' }}>
+              👑 Join VIP
             </a>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fadeInUp delay-400">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {stats.map((s) => (
-              <div key={s.label} className="glass rounded-2xl p-5">
+              <div key={s.label} className="rounded-2xl p-4 sm:p-5 bg-white/5 border border-white/10 backdrop-blur-sm">
                 <div className="text-2xl mb-1">{s.icon}</div>
-                <div className="text-2xl lg:text-3xl font-extrabold text-white mb-1" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+                <div className="text-xl lg:text-2xl font-extrabold text-white mb-1" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
                   {s.value}
                 </div>
-                <div className="text-xs text-[#6B7394] uppercase tracking-wider">{s.label}</div>
+                <div className="text-[11px] sm:text-xs text-[#6B7394] uppercase tracking-wider">{s.label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ============ FEATURED MATCH ============ */}
-      <section className="py-16">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-10 scroll-reveal">
-            <h2 className="text-3xl font-extrabold mb-3">
-              Featured <span className="text-gradient">Match</span>
-            </h2>
-            <p className="text-[#B0B8D1] max-w-xl mx-auto">
-              Our highest-conviction pick of the day — backed by deep statistical analysis.
-            </p>
-          </div>
-          <div className="max-w-lg mx-auto scroll-reveal">
-            <MatchCard
-              home="Manchester City"
-              away="Arsenal"
-              league="Premier League"
-              kickoff="Today, 17:00"
-              prediction="1"
-              odds="1.85"
-              confidence={91}
-              type="1X2"
-            />
+      {/* ============ CATEGORY NAVIGATION ============ */}
+      <section className="py-8 bg-[#0A0E27] border-t border-white/5">
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6">
+          <div className="cat-scroll">
+            {categoryTabs.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`cat-pill ${activeCategory === cat.id ? 'active' : ''}`}
+              >
+                <span>{cat.icon}</span>
+                <span>{cat.label}</span>
+              </button>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ============ TODAY'S PICKS ============ */}
-      <section className="py-16" style={{ background: 'linear-gradient(180deg, transparent, rgba(19,24,73,0.4))' }}>
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-10 scroll-reveal">
-            <h2 className="text-3xl font-extrabold mb-3">
-              Today&apos;s Top <span className="text-gradient">Predictions</span>
-            </h2>
-            <p className="text-[#B0B8D1] max-w-xl mx-auto">
-              Fresh picks updated daily across all major leagues.
-            </p>
+      {/* ============ FREE PREDICTIONS ============ */}
+      <section className="py-10 sm:py-14 px-4 sm:px-6" style={{ background: '#F4F6FB' }}>
+        <div className="max-w-[1300px] mx-auto">
+          {/* Header row */}
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F1535] mb-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+                FREE PREDICTIONS
+              </h2>
+              <p className="text-sm font-semibold text-[#6B7394]">
+                {isToday ? 'TODAY' : 'SHOWING'} - {formatDateLabel(selectedDate).toUpperCase()}
+              </p>
+            </div>
+
+            {/* Date nav + league filter */}
+            <div className="flex flex-wrap items-center gap-2">
+              <button className="date-nav-btn" onClick={() => shiftDate(-1)} aria-label="Previous day">
+                ← Prev
+              </button>
+              <button className="date-nav-btn" onClick={() => shiftDate(1)} aria-label="Next day" disabled={isToday}>
+                Next →
+              </button>
+              <select
+                className="filter-select"
+                value={leagueFilter}
+                onChange={(e) => setLeagueFilter(e.target.value)}
+                aria-label="Filter by league"
+              >
+                <option value="all">All Leagues</option>
+                {leagueOptions.filter(l => l !== 'all').map(l => (
+                  <option key={l} value={l}>{l}</option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {picks.map((p, i) => (
-              <div key={p.id} className={`scroll-reveal delay-${(i % 4) * 100}`}>
-                <PredictionCard {...p} />
+
+          {/* Loading skeletons */}
+          {loading && (
+            <div className="pred-grid">
+              {[0, 1, 2, 3].map(i => (
+                <div key={i} className="pred-skeleton">
+                  <div className="skeleton h-4 w-1/3 mb-3" />
+                  <div className="skeleton h-10 w-3/4 mx-auto mb-3" />
+                  <div className="skeleton h-8 w-full mb-2" />
+                  <div className="skeleton h-2 w-full" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Error state */}
+          {!loading && error && (
+            <div className="text-center py-16 bg-white rounded-2xl border border-red-200">
+              <div className="text-5xl mb-4">⚠️</div>
+              <h3 className="text-xl font-bold text-[#0F1535] mb-2">Something went wrong</h3>
+              <p className="text-[#6B7394] mb-5">{error}</p>
+              <button onClick={loadPredictions} className="btn btn-primary">Try Again</button>
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!loading && !error && filteredPredictions.length === 0 && (
+            <div className="text-center py-16 bg-white rounded-2xl border border-slate-100">
+              <div className="text-5xl mb-4">🔍</div>
+              <h3 className="text-xl font-bold text-[#0F1535] mb-2">No Predictions Found</h3>
+              <p className="text-[#6B7394] mb-5">
+                No {activeCategory === 'vip' ? 'VIP' : 'predictions'} available for this date and filter.
+                Try a different date or category.
+              </p>
+              <div className="flex justify-center gap-3 flex-wrap">
+                <button onClick={() => setSelectedDate(new Date(new Date().setHours(0,0,0,0)))} className="btn btn-primary">Go to Today</button>
+                <button onClick={() => { setActiveCategory('all'); setLeagueFilter('all'); }} className="btn btn-secondary">Clear Filters</button>
               </div>
-            ))}
+            </div>
+          )}
+
+          {/* Predictions grid */}
+          {!loading && !error && filteredPredictions.length > 0 && (
+            <div className="pred-grid">
+              {filteredPredictions.map((p) => (
+                <PredictionCard key={p.id} {...p} />
+              ))}
+            </div>
+          )}
+
+          {/* View all link */}
+          <div className="text-center mt-8">
+            <a href="/predictions" className="btn btn-round btn-primary">View All Predictions →</a>
           </div>
-          <div className="text-center mt-10 scroll-reveal">
-            <a href="/predictions" className="btn btn-primary">
-              View All Predictions →
+        </div>
+      </section>
+
+      {/* ============ VIP SECTION ============ */}
+      <section className="py-14 sm:py-20 px-4 sm:px-6">
+        <div className="max-w-[1300px] mx-auto">
+          <div className="vip-card rounded-3xl p-8 sm:p-12 lg:p-14 text-center overflow-hidden">
+            <div className="text-5xl mb-4">👑</div>
+            <h2 className="text-2xl sm:text-4xl font-extrabold mb-4 text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+              Unlock <span className="vip-gold-text">VIP Predictions</span>
+            </h2>
+            <p className="text-[#B0B8D1] max-w-xl mx-auto mb-8">
+              Get exclusive VIP picks with the highest confidence, correct score tips, accumulators,
+              banker selections, and premium analysis — all backed by expert research.
+            </p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-8 max-w-3xl mx-auto">
+              {vipFeatures.map((f) => (
+                <div key={f.label} className="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-white/5 border border-white/10">
+                  <span className="text-lg">{f.icon}</span>
+                  <span className="text-sm font-semibold text-white text-left">{f.label}</span>
+                </div>
+              ))}
+            </div>
+
+            <a
+              href="/premium"
+              className="btn btn-round text-base"
+              style={{ background: 'linear-gradient(135deg,#FFD700,#B8860B)', color: '#0A0E27', boxShadow: '0 0 30px rgba(255,215,0,0.3)' }}
+            >
+              Join VIP →
             </a>
           </div>
         </div>
       </section>
 
-      {/* ============ FEATURES ============ */}
-      <section className="py-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-12 scroll-reveal">
-            <h2 className="text-3xl font-extrabold mb-3">
+      {/* ============ WHY CHOOSE US ============ */}
+      <section className="py-14 sm:py-20 px-4 sm:px-6" style={{ background: '#0A0E27' }}>
+        <div className="max-w-[1300px] mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl sm:text-3xl font-extrabold mb-3 text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
               Why Choose <span className="text-gradient">PrimePredict</span>
             </h2>
             <p className="text-[#B0B8D1] max-w-xl mx-auto">
-              Everything you need to bet with confidence, in one platform.
+              Everything you need to bet with confidence, in one professional platform.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {features.map((f, i) => (
-              <div key={f.title} className={`card scroll-reveal delay-${(i % 3) * 100}`}>
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4"
-                  style={{ background: 'linear-gradient(135deg, rgba(0,229,255,0.12), rgba(124,77,255,0.12))', border: '1px solid rgba(0,229,255,0.2)' }}
-                >
+            {[
+              { icon: '📊', title: 'Data-Driven Analysis', desc: 'Our models analyze form, head-to-head, xG, and market trends to deliver high-confidence picks.' },
+              { icon: '🎯', title: 'Multiple Categories', desc: 'From 1X2 and Over/Under to Correct Score and BTTS — we cover every major market.' },
+              { icon: '⚡', title: 'Instant Updates', desc: 'Get notified the moment new predictions drop so you never miss an opportunity.' },
+              { icon: '🔒', title: 'Secure Payments', desc: 'Pay seamlessly with M-Pesa, Stripe, PesaPal, or crypto — fully encrypted.' },
+              { icon: '👑', title: 'VIP Picks', desc: 'Unlock exclusive correct-score tips and expert analysis with a proven track record.' },
+              { icon: '📈', title: 'Track Performance', desc: 'Follow your betting performance with an intuitive dashboard and transparent results.' },
+            ].map((f) => (
+              <div key={f.title} className="rounded-2xl p-6 bg-white/5 border border-white/10 hover:border-cyan-400/30 transition-all hover:-translate-y-1">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4" style={{ background: 'linear-gradient(135deg, rgba(0,229,255,0.12), rgba(124,77,255,0.12))' }}>
                   {f.icon}
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">{f.title}</h3>
@@ -255,175 +367,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ============ HOW IT WORKS ============ */}
-      <section className="py-20" style={{ background: 'linear-gradient(180deg, transparent, rgba(124,77,255,0.05))' }}>
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-12 scroll-reveal">
-            <h2 className="text-3xl font-extrabold mb-3">
-              How It <span className="text-gradient">Works</span>
-            </h2>
-            <p className="text-[#B0B8D1] max-w-xl mx-auto">
-              Get started in four simple steps.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {steps.map((s, i) => (
-              <div key={s.num} className="relative text-center p-6 scroll-reveal delay-100">
-                <div className="text-5xl font-extrabold mb-4 text-gradient opacity-20" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-                  {s.num}
-                </div>
-                <div className="text-3xl mb-3">{s.icon}</div>
-                <h3 className="text-base font-bold text-white mb-2">{s.title}</h3>
-                <p className="text-sm text-[#B0B8D1] m-0">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ============ PREMIUM CTA ============ */}
-      <section className="py-20">
-        <div className="max-w-4xl mx-auto px-6">
-          <div
-            className="relative rounded-3xl p-10 lg:p-14 text-center overflow-hidden scroll-reveal"
-            style={{ background: 'linear-gradient(135deg, rgba(124,77,255,0.12), rgba(255,215,0,0.06))', border: '1px solid rgba(124,77,255,0.25)' }}
-          >
-            <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full pointer-events-none"
-              style={{ background: 'radial-gradient(circle, rgba(124,77,255,0.18), transparent 70%)' }} />
-            <div className="text-5xl mb-4">👑</div>
-            <h2 className="text-3xl font-extrabold mb-3">
-              Unlock Your Winning <span className="text-gradient">Edge</span>
-            </h2>
-            <p className="text-[#B0B8D1] max-w-lg mx-auto mb-8">
-              Go premium for correct score tips, HT/FT predictions, expert analysis, and a
-              personal betting consultant. Plans start at just <strong className="text-white">KES 499/week</strong>.
-            </p>
-            <a href="/pricing" className="btn btn-premium btn-lg">
-              View Subscription Plans →
-            </a>
-            <div className="flex justify-center gap-8 mt-8 flex-wrap">
-              <div>
-                <div className="text-2xl font-extrabold text-white">7-Day</div>
-                <div className="text-xs text-[#6B7394]">Money-Back Guarantee</div>
-              </div>
-              <div>
-                <div className="text-2xl font-extrabold text-white">24/7</div>
-                <div className="text-xs text-[#6B7394]">Dedicated Support</div>
-              </div>
-              <div>
-                <div className="text-2xl font-extrabold text-white">Instant</div>
-                <div className="text-xs text-[#6B7394]">Access After Payment</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-{/* ============ PERFORMANCE DASHBOARD (DATA VIZ) ============ */}
-      <section className="py-20" style={{ background: 'linear-gradient(180deg, transparent, rgba(19,24,73,0.4))' }}>
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-12 scroll-reveal">
-            <h2 className="text-3xl font-extrabold mb-3">
-              Proven <span className="text-gradient">Performance</span>
-            </h2>
-            <p className="text-[#B0B8D1] max-w-xl mx-auto">
-              Real results tracked transparently across every category. No hype — just data.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            {/* Win Rate Gauge */}
-            <div className="card scroll-reveal flex flex-col items-center justify-center text-center">
-              <div className="text-xs uppercase tracking-wider text-[#6B7394] mb-3">Overall Win Rate</div>
-              <div
-                className="relative w-40 h-40 rounded-full mb-4"
-                style={{
-                  background: 'conic-gradient(#00E676 0% 87%, rgba(255,255,255,0.06) 87% 100%)',
-                  WebkitMask: 'radial-gradient(farthest-side, transparent 62%, #000 63%)',
-                  mask: 'radial-gradient(farthest-side, transparent 62%, #000 63%)',
-                }}
-              />
-              <div className="absolute text-5xl font-extrabold text-white" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-                87%
-              </div>
-              <div className="text-sm text-[#B0B8D1] mt-6">
-                <span className="text-[#00E676] font-bold">+2.4%</span> vs last month
-              </div>
-            </div>
-
-            {/* Confidence Bars */}
-            <div className="card scroll-reveal">
-              <h3 className="text-lg font-bold text-white mb-5">Confidence by Category</h3>
-              {[
-                { label: '1X2', pct: 91, color: '#00E5FF' },
-                { label: 'Over/Under', pct: 86, color: '#7C4DFF' },
-                { label: 'Correct Score', pct: 74, color: '#00E676' },
-                { label: 'HT/FT', pct: 68, color: '#FFD700' },
-                { label: 'Double Chance', pct: 88, color: '#FF6B35' },
-              ].map((c) => (
-                <div key={c.label} className="mb-4 last:mb-0">
-                  <div className="flex items-center justify-between text-sm mb-1.5">
-                    <span className="text-[#B0B8D1]">{c.label}</span>
-                    <span className="text-white font-semibold">{c.pct}%</span>
-                  </div>
-                  <div className="confidence-bar">
-                    <div
-                      className="confidence-fill"
-                      style={{ width: `${c.pct}%`, background: c.color }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Monthly Bar Chart */}
-            <div className="card scroll-reveal">
-              <h3 className="text-lg font-bold text-white mb-5">Monthly Results</h3>
-              <div className="flex items-end justify-between gap-2 h-36">
-                {[
-                  { m: 'N', val: 42 }, { m: 'D', val: 38 }, { m: 'J', val: 45 },
-                  { m: 'F', val: 40 }, { m: 'M', val: 48 }, { m: 'A', val: 44 },
-                ].map((d, i) => (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
-                    <span className="text-[10px] font-semibold text-[#6B7394]">{d.val}</span>
-                    <div
-                      className="w-full rounded-t"
-                      style={{
-                        height: `${(d.val / 48) * 120}px`,
-                        background: 'linear-gradient(180deg, #00E5FF, #7C4DFF)',
-                        opacity: 0.85,
-                      }}
-                    />
-                    <span className="text-[10px] text-[#6B7394]">{d.m}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-center gap-4 mt-4 text-xs text-[#6B7394]">
-                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: '#00E5FF' }} /> Won</span>
-                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm inline-block text-[#FF5252]" style={{ background: '#FF5252' }} /> Lost</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Category breakdown strip */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5 scroll-reveal">
-            {[
-              { icon: '⚽', label: '1X2', stat: '91%' },
-              { icon: '📈', label: 'Over/Under', stat: '86%' },
-              { icon: '🎯', label: 'Correct Score', stat: '74%' },
-              { icon: '🔀', label: 'HT/FT', stat: '68%' },
-            ].map((c) => (
-              <div key={c.label} className="glass rounded-2xl p-4 text-center">
-                <div className="text-2xl mb-1">{c.icon}</div>
-                <div className="text-xl font-extrabold text-white">{c.stat}</div>
-                <div className="text-xs text-[#6B7394]">{c.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
-

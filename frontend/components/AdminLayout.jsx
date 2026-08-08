@@ -16,7 +16,7 @@ const navItems = [
  * Professional admin layout with a collapsible sidebar and topbar.
  * Renders the auth-guarded shell for all /admin sub-pages.
  */
-export default function AdminLayout({ title, subtitle, actions, children }) {
+export default function AdminLayout({ title = 'Admin', subtitle, actions, children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);

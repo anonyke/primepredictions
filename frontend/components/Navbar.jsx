@@ -5,12 +5,13 @@ import { useAuth } from '../context/AuthContext';
 import { usePathname } from 'next/navigation';
 
 const navLinks = [
-  { href: '/', label: 'Dashboard' },
+  { href: '/', label: 'Home' },
   { href: '/predictions', label: 'Free Predictions' },
-  { href: '/premium', label: 'Premium Predictions' },
+  { href: '/premium', label: 'VIP Predictions' },
+  { href: '/predictions?category=banker-tips', label: 'Banker' },
+  { href: '/predictions?category=double-chance', label: 'Double Chance' },
+  { href: '/predictions?category=over-2.5', label: 'Over/Under' },
   { href: '/results', label: 'Results' },
-  { href: '/pricing', label: 'Statistics' },
-  { href: '/pricing', label: 'Subscription' },
 ];
 
 const userMenuLinks = [
@@ -61,27 +62,25 @@ const [scrolled, setScrolled] = useState(false);
       isActive(href) ? 'text-cyan-400' : 'text-gray-300 hover:text-cyan-300'
     }`;
 
-  return (
+return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled || menuOpen
-          ? 'bg-[#0A0E27]/90 backdrop-blur-xl shadow-lg border-b border-white/5'
-          : 'bg-transparent'
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-[#05070F]/95 backdrop-blur-xl ${
+        scrolled || menuOpen ? 'shadow-lg border-b border-white/10' : 'border-b border-white/5'
       }`}
     >
-      <nav className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <nav className="max-w-[1300px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Logo */}
-        <a href="/" className="flex items-center gap-2 text-white font-bold text-lg no-underline group">
+        <a href="/" className="flex items-center gap-2 text-white font-bold text-lg no-underline group shrink-0">
           <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 to-violet-500 text-black text-base font-extrabold shadow-[0_0_20px_rgba(0,229,255,0.35)] group-hover:shadow-[0_0_30px_rgba(124,77,255,0.5)] transition-shadow">
             PP
           </span>
-          <span className="font-display tracking-tight">
+          <span className="font-display tracking-tight text-base sm:text-lg">
             Prime<span className="text-gradient">Predict</span>
           </span>
         </a>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-7">
+        <div className="hidden lg:flex items-center gap-6 xl:gap-7">
           {navLinks.map((link) => (
             <a key={link.href} href={link.href} className={linkClass(link.href)}>
               {link.label}
@@ -104,6 +103,18 @@ const [scrolled, setScrolled] = useState(false);
           >
             {theme === 'dark' ? '🌙' : '☀️'}
           </button>
+          {/* VIP Button */}
+          <a
+            href="/premium"
+            className="hidden lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold no-underline transition-all hover:-translate-y-0.5"
+            style={{
+              background: 'linear-gradient(135deg, #FFD700, #B8860B)',
+              color: '#0A0E27',
+              boxShadow: '0 0 18px rgba(255,215,0,0.35)',
+            }}
+          >
+            👑 VIP
+          </a>
 {user ? (
             <div className="relative flex items-center gap-3">
               <button
@@ -113,7 +124,7 @@ const [scrolled, setScrolled] = useState(false);
                 <span className="flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-cyan-400 to-violet-500 text-black text-xs font-bold">
                   {user.name?.charAt(0)?.toUpperCase() || 'U'}
                 </span>
-                <span className="text-gray-300">{user.name?.split(' ')[0] || 'Account'}</span>
+                <span className="text-gray-300 hidden sm:inline">{user.name?.split(' ')[0] || 'Account'}</span>
                 <span className="text-xs text-gray-400">{userMenuOpen ? '▲' : '▼'}</span>
               </button>
               {userMenuOpen && (

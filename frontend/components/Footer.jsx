@@ -43,14 +43,14 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative bg-[#0A0E27] border-t border-white/5 pt-14 pb-8 text-gray-300 overflow-hidden">
+    <footer className="relative bg-[#05070F] border-t border-white/10 pt-14 pb-8 text-gray-300 overflow-hidden">
       {/* Gradient top line */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
 
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-10">
+      <div className="max-w-[1300px] mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 lg:gap-10 mb-10">
           {/* Brand */}
-          <div>
+          <div className="col-span-2 md:col-span-1">
             <a href="/" className="flex items-center gap-2 text-white font-bold text-lg mb-4 no-underline">
               <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-violet-500 text-black text-sm font-extrabold">
                 PP
@@ -90,16 +90,16 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* About / Quick Links */}
           <div>
-            <h4 className="text-white font-semibold text-sm mb-4 uppercase tracking-wider">Quick Links</h4>
+            <h4 className="text-white font-semibold text-sm mb-4 uppercase tracking-wider">About</h4>
             <div className="flex flex-col gap-2.5">
               {[
+                { href: '/', label: 'Home' },
                 { href: '/predictions', label: 'Free Predictions' },
-                { href: '/premium', label: 'Premium Tips' },
-                { href: '/pricing', label: 'Pricing' },
+                { href: '/premium', label: 'VIP Predictions' },
                 { href: '/results', label: 'Results' },
-                { href: '/dashboard', label: 'Dashboard' },
+                { href: '/pricing', label: 'Pricing' },
               ].map((l) => (
                 <a key={l.label} href={l.href} className="text-gray-400 hover:text-cyan-400 text-sm no-underline transition-colors">
                   {l.label}
@@ -108,15 +108,16 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Prediction Types */}
+          {/* Predictions */}
           <div>
             <h4 className="text-white font-semibold text-sm mb-4 uppercase tracking-wider">Predictions</h4>
             <div className="flex flex-col gap-2.5">
               {[
                 { href: '/predictions?category=1x2', label: '1X2 Predictions' },
-                { href: '/predictions?category=over-under', label: 'Over/Under' },
+                { href: '/predictions?category=over-2.5', label: 'Over/Under' },
                 { href: '/predictions?category=btts', label: 'BTTS' },
                 { href: '/predictions?category=double-chance', label: 'Double Chance' },
+                { href: '/predictions?category=banker-tips', label: 'Banker Tips' },
                 { href: '/predictions?category=correct-score', label: 'Correct Score' },
               ].map((l) => (
                 <a key={l.label} href={l.href} className="text-gray-400 hover:text-cyan-400 text-sm no-underline transition-colors">
@@ -126,15 +127,15 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Support */}
+          {/* Support + Legal */}
           <div>
             <h4 className="text-white font-semibold text-sm mb-4 uppercase tracking-wider">Support</h4>
             <div className="flex flex-col gap-2.5">
               {[
-                { href: '/pricing', label: 'Help Center' },
                 { href: '/register', label: 'Create Account' },
                 { href: '/login', label: 'Sign In' },
-                { href: '/forgot-password', label: 'Forgot Password' },
+                { href: '/dashboard', label: 'My Dashboard' },
+                { href: '/dashboard/subscription', label: 'My Subscription' },
               ].map((l) => (
                 <a key={l.label} href={l.href} className="text-gray-400 hover:text-cyan-400 text-sm no-underline transition-colors">
                   {l.label}
@@ -142,23 +143,43 @@ export default function Footer() {
               ))}
             </div>
 
-            {/* Payment methods */}
-            <div className="mt-5">
-              <h4 className="text-white font-semibold text-sm mb-2 uppercase tracking-wider">We Accept</h4>
-              <div className="flex flex-wrap gap-2">
-                {paymentMethods.map((m) => (
-                  <span key={m} className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs text-gray-300">
-                    {m}
-                  </span>
-                ))}
-              </div>
+            <h4 className="text-white font-semibold text-sm mb-3 mt-5 uppercase tracking-wider">Legal</h4>
+            <div className="flex flex-col gap-2.5">
+              {[
+                { href: '/terms', label: 'Terms & Conditions' },
+                { href: '/privacy', label: 'Privacy Policy' },
+                { href: '/responsible-betting', label: 'Responsible Betting' },
+              ].map((l) => (
+                <a key={l.label} href={l.href} className="text-gray-400 hover:text-cyan-400 text-sm no-underline transition-colors">
+                  {l.label}
+                </a>
+              ))}
             </div>
           </div>
         </div>
 
+        {/* Responsible betting disclaimer */}
+        <div className="mb-8 p-4 rounded-xl bg-white/5 border border-white/10 text-center">
+          <p className="text-gray-400 text-xs leading-relaxed">
+            <strong className="text-gray-300">Responsible Betting:</strong> Bet responsibly. Our predictions are
+            for informational purposes only and do not guarantee results. Only bet what you can afford to lose.
+            If you need help, contact a responsible gambling organisation. 18+.
+          </p>
+        </div>
+
+        {/* Payment methods */}
+        <div className="mb-8 flex flex-wrap items-center justify-center gap-2">
+          <span className="text-xs text-gray-500 uppercase tracking-wider mr-1">We Accept:</span>
+          {paymentMethods.map((m) => (
+            <span key={m} className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs text-gray-300">
+              {m}
+            </span>
+          ))}
+        </div>
+
         {/* Social & Copyright */}
-        <div className="border-t border-white/5 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-gray-500 text-sm">
+        <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-gray-500 text-sm text-center md:text-left">
             &copy; {new Date().getFullYear()} PrimePredict.co.ke. All rights reserved.
           </p>
           <div className="flex gap-3">
@@ -180,4 +201,3 @@ export default function Footer() {
     </footer>
   );
 }
-
