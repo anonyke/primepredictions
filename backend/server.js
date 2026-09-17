@@ -9,6 +9,7 @@ import { connectDB } from './config/database.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import predictionRoutes from './routes/predictionRoutes.js';
+import matchRoutes from './routes/matchRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import { handleStripeWebhookRaw, handlePesapalIpn } from './controllers/paymentController.js';
 import adminRoutes from './routes/adminRoutes.js';
@@ -120,6 +121,7 @@ app.use('/api', requireApiKey);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/predictions', predictionRoutes);
+app.use('/api/matches', matchRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 
